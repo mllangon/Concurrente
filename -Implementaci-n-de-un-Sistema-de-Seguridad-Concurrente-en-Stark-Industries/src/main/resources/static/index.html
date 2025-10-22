@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Stark Security - Live</title>
+  <link href="https://cdn.jsdelivr.net/npm/modern-normalize/modern-normalize.css" rel="stylesheet" />
+  <style>
+    :root { --bg:#0b1020; --card:#111931; --muted:#a8b3cf; --text:#e6edf7; --accent:#13b3ff; --warn:#ffbf47; --crit:#ff5c5c; }
+    * { box-sizing: border-box; }
+    body { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial; margin: 0; background: var(--bg); color: var(--text); }
+    header { padding: 20px 28px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #1d2542; background: #0e1530; position: sticky; top: 0; z-index: 2; }
+    header h1 { margin: 0; font-size: 22px; letter-spacing: .2px; }
+    main { padding: 24px; max-width: 1200px; margin: 0 auto; }
+    nav { display: flex; gap: 8px; }
+    .tab-btn { background: #0f1a36; color: var(--text); border: 1px solid #233056; padding: 8px 12px; border-radius: 8px; cursor: pointer; }
+    .tab-btn:hover { border-color: var(--accent); }
+    a { color: var(--accent); text-decoration: none; }
+    .card { background: var(--card); border: 1px solid #1e2a4a; border-radius: 12px; padding: 16px; box-shadow: 0 6px 18px rgba(0,0,0,.25); }
+    .grid { display: grid; gap: 16px; }
+    .grid-2 { grid-template-columns: 2fr 1fr; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 10px 12px; border-bottom: 1px solid #203059; }
+    thead th { text-align: left; color: var(--muted); font-weight: 600; }
+    tbody tr:hover { background: #0e1a38; }
+    .badge { padding: 2px 8px; border-radius: 999px; font-size: 12px; border: 1px solid #2a3a65; }
+    .CRITICAL { background: rgba(255,92,92,.15); border-color: #ff8a8a; color: #ffb3b3; }
+    .WARN { background: rgba(255,191,71,.15); border-color: #ffd389; color: #ffe1a8; }
+    .INFO { background: rgba(19,179,255,.15); border-color: #74d7ff; color: #b9ecff; }
+    #status { margin-bottom: 10px; color: var(--muted); }
+    .metrics pre { background: #0d152e; border: 1px solid #24325a; border-radius: 8px; padding: 12px; color: #cbd6f6; max-height: 260px; overflow: auto; }
+    .tab { display: none; }
+    .tab.active { display: block; }
+    .controls { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; }
+    select, button { background: #0f1a36; color: var(--text); border: 1px solid #233056; padding: 8px 10px; border-radius: 8px; }
+    button { cursor: pointer; }
+    /* Login modal */
+    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,.6); display: none; align-items: center; justify-content: center; z-index: 5; }
+    .overlay.show { display: flex; }
+    .login-card { width: 360px; }
+    .login-card h3 { margin-top: 0; }
+    .login-card label { display: block; margin: 10px 0 4px; color: var(--muted); }
+    .login-card input { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #233056; background: #0f1a36; color: var(--text); }
+    .login-card .err { color: #ff8a8a; margin-top: 8px; display: none; }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+  </head>
+<body>
+<h1>Stark Security</h1>
+
+<header>
+  <h1>Stark Security</h1>
+  <nav>
+    <button class="tab-btn" data-tab="tab-dashboard">Dashboard</button>
+    <button class="tab-btn" data-tab="tab-events">Eventos</button>
+    <button class="tab-btn" data-tab="tab-access">Accesos</button>
+    <a href="/swagger-ui/index.html" target="_blank" style="margin-left:8px">Swagger</a>
+  </nav>
+  </header>
+<main>
+
+<section id="tab-dashboard" class="tab active">
+  <div class="grid grid-2">
+    <div class="card">
+      <h2 style="margin-top:0">Live Alerts</h2>
+      <div id="status">Conectando...</div>
+      <table id="alerts">
+        <thead><tr><th>Timestamp</th><th>Sensor</th><th>Tipo</th><th>Severidad</th><th>Mensaje</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="card metrics">
+      <h3 style="margin-top:0">Métricas</h3>
+      <pre id="metricsPre">Cargando métricas...</pre>
+    </div>
+  </div>
+</section>
+
+<section id="tab-events" class="tab">
+  <div class="card">
+    <h2 style="margin-top:0">Eventos</h2>
+    <div class="controls">
+      <label>Tipo:</label>
+      <select id="typeFilter"><option value="">Todos</option><option>MOTION</option><option>TEMPERATURE</option><option>ACCESS</option></select>
+      <label>Severidad:</label>
+      <select id="sevFilter"><option value="">Todas</option><option>INFO</option><option>WARN</option><option>CRITICAL</option></select>
+      <button id="btnLoadEvents">Cargar</button>
+    </div>
+    <div class="card" style="margin-bottom:12px; background:#0e1530">
+      <div class="controls" style="flex-wrap:wrap">
+        <strong style="margin-right:8px">Agregar evento</strong>
+        <label>Sensor</label>
+        <select id="sensorSelect" style="min-width:220px"></select>
+        <label>Tipo</label>
+        <select id="eventType">
+          <option>MOTION</option>
+          <option>TEMPERATURE</option>
+          <option>ACCESS</option>
+        </select>
+        <label>Valor</label>
+        <input id="eventValue" placeholder="p.ej. MOTION_DETECTED / 42 / true" style="width:240px; background:#0f1a36; color:#e6edf7; border:1px solid #233056; padding:8px 10px; border-radius:8px" />
+        <button id="btnAddEvent">Enviar</button>
+      </div>
+    </div>
+    <table id="eventsTable">
+      <thead><tr><th>Ts</th><th>SensorId</th><th>Tipo</th><th>Severidad</th><th>Valor</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</section>
+
+<section id="tab-access" class="tab">
+  <div class="card">
+    <h2 style="margin-top:0">Accesos</h2>
+    <table id="accessTable">
+      <thead><tr><th>Ts</th><th>Persona</th><th>Autorizado</th><th>Ubicación</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <div style="margin-top:10px"><button id="btnLoadAccess">Cargar accesos</button></div>
+  </div>
+</section>
+
+<script>
+  let client;
+  function connect() {
+    const socket = new SockJS('/ws');
+    client = Stomp.over(socket);
+    client.debug = null;
+    client.connect({}, function() {
+      document.getElementById('status').innerText = 'Conectado a /topic/alerts';
+      client.subscribe('/topic/alerts', function(message) {
+        const m = JSON.parse(message.body);
+        addRow(m);
+      });
+    }, function() {
+      document.getElementById('status').innerText = 'Reconectando...';
+      setTimeout(connect, 2000);
+    });
+  }
+  function addRow(m) {
+    const tr = document.createElement('tr');
+    tr.className = m.severity;
+    tr.innerHTML = `<td>${new Date(m.timestamp).toLocaleTimeString()}</td><td>${m.sensorName}</td><td>${m.type}</td><td>${m.severity}</td><td>${m.message}</td>`;
+    document.querySelector('#alerts tbody').prepend(tr);
+  }
+  async function loadMetrics() {
+    try {
+      const res = await fetch('/api/metrics/public');
+      const data = await res.json();
+      document.getElementById('metricsPre').innerText = JSON.stringify(data, null, 2);
+    } catch (e) { document.getElementById('metricsPre').innerText = 'Error cargando métricas'; }
+    setTimeout(loadMetrics, 5000);
+  }
+  async function loadEvents() {
+    const type = document.getElementById('typeFilter').value;
+    const sev = document.getElementById('sevFilter').value;
+    const p = new URLSearchParams();
+    if (type) p.append('type', type);
+    if (sev) p.append('severity', sev);
+    p.append('page','0'); p.append('size','20');
+    const res = await fetch('/api/events?' + p.toString(), { redirect: 'manual', credentials: 'same-origin' });
+    if (res.status === 401 || res.status === 403 || res.status === 302) { return showLogin(loadEvents); }
+    if (!res.ok) { alert('Error cargando eventos (HTTP '+res.status+')'); return; }
+    const data = await res.json();
+    const tbody = document.querySelector('#eventsTable tbody');
+    tbody.innerHTML = '';
+    data.content.forEach(e => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${e.ts}</td><td>${e.sensorId}</td><td>${e.type}</td><td>${e.severity}</td><td>${e.value ?? ''}</td>`;
+      tbody.appendChild(tr);
+    });
+  }
+  async function loadAccess() {
+    const res = await fetch('/api/access/logs', { redirect: 'manual', credentials: 'same-origin' });
+    if (res.status === 401 || res.status === 403 || res.status === 302) { return showLogin(loadAccess); }
+    if (!res.ok) { alert('Error cargando accesos (HTTP '+res.status+')'); return; }
+    const data = await res.json();
+    const tbody = document.querySelector('#accessTable tbody');
+    tbody.innerHTML = '';
+    data.forEach(a => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${a.ts}</td><td>${a.personName} (${a.personId})</td><td>${a.authorized}</td><td>${a.location}</td>`;
+      tbody.appendChild(tr);
+    });
+  }
+
+  // Tabs
+  function activateTab(id) {
+    document.querySelectorAll('.tab').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => activateTab(btn.dataset.tab));
+  });
+
+  // Init
+  connect();
+  loadMetrics();
+  document.getElementById('btnLoadEvents').addEventListener('click', loadEvents);
+  document.getElementById('btnLoadAccess').addEventListener('click', loadAccess);
+  // Cargar sensores para el combo de "Agregar evento"
+  async function loadSensors() {
+    try {
+      const res = await fetch('/api/sensors', { credentials: 'same-origin', redirect: 'manual' });
+      if (res.status === 401 || res.status === 302) return; // se pedirá login al intentar enviar
+      const sensors = await res.json();
+      const sel = document.getElementById('sensorSelect');
+      sel.innerHTML = '';
+      sensors.forEach(s => {
+        const o = document.createElement('option'); o.value = s.id; o.textContent = `${s.name} (${s.type})`;
+        sel.appendChild(o);
+      });
+    } catch {}
+  }
+  loadSensors();
+
+  async function addEvent() {
+    const sensorId = document.getElementById('sensorSelect').value;
+    const type = document.getElementById('eventType').value;
+    const value = document.getElementById('eventValue').value || '';
+    if (!sensorId) { alert('Selecciona un sensor'); return; }
+    const body = JSON.stringify({ sensorId, type, value });
+    const res = await fetch(`/api/sensors/${sensorId}/events`, { method: 'POST', headers: { 'Content-Type':'application/json' }, body, credentials: 'same-origin', redirect: 'manual' });
+    if (res.status === 401 || res.status === 302) { return showLogin(addEvent); }
+    if (res.status === 403) { alert('No autorizado para enviar eventos'); return; }
+    if (res.ok || res.status === 202) {
+      document.getElementById('eventValue').value = '';
+      // refrescar tabla de eventos
+      setTimeout(loadEvents, 300);
+    } else {
+      alert('Error enviando evento (HTTP '+res.status+')');
+    }
+  }
+  document.getElementById('btnAddEvent').addEventListener('click', addEvent);
+
+  // Login modal logic
+  let pendingAction = null;
+  function showLogin(next) {
+    pendingAction = next;
+    document.getElementById('loginOverlay').classList.add('show');
+  }
+  async function doLogin(ev) {
+    ev.preventDefault();
+    const form = ev.target;
+    const u = form.username.value; const p = form.password.value;
+    const body = new URLSearchParams({ username: u, password: p }).toString();
+    const res = await fetch('/login', { method: 'POST', headers: {'Content-Type':'application/x-www-form-urlencoded'}, body, redirect: 'manual', credentials: 'same-origin' });
+    if (res.ok || res.status === 302) {
+      document.getElementById('loginErr').style.display = 'none';
+      document.getElementById('loginOverlay').classList.remove('show');
+      // Verificar que la sesión está activa antes de reintentar
+      try {
+        const probe = await fetch('/api/health/live', { credentials: 'same-origin', redirect: 'manual' });
+        if (probe.status === 401 || probe.status === 403) {
+          document.getElementById('loginErr').style.display = 'block';
+          return;
+        }
+      } catch {}
+      const next = pendingAction; pendingAction = null; if (next) next();
+    } else {
+      document.getElementById('loginErr').style.display = 'block';
+    }
+  }
+  window.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('loginForm').addEventListener('submit', doLogin);
+    document.getElementById('loginCancel').addEventListener('click', () => {
+      pendingAction = null; document.getElementById('loginOverlay').classList.remove('show');
+    });
+  });
+</script>
+
+<!-- Login Overlay -->
+<div class="overlay" id="loginOverlay">
+  <form class="card login-card" id="loginForm">
+    <h3>Autenticación requerida</h3>
+    <label>Usuario</label>
+    <input type="text" name="username" required autocomplete="username" />
+    <label>Contraseña</label>
+    <input type="password" name="password" required autocomplete="current-password" />
+    <div style="display:flex; gap:8px; margin-top:12px">
+      <button type="submit" style="flex:1">Entrar</button>
+      <button type="button" id="loginCancel" style="flex:1">Cancelar</button>
+    </div>
+    <div class="err" id="loginErr">Credenciales inválidas</div>
+    <p style="color:#a8b3cf; margin-top:10px">Demo: admin/admin, sec/sec, op/op, view/view</p>
+  </form>
+  </div>
+ </main>
+ </body>
+ </html>
+
+
+
