@@ -49,6 +49,23 @@ mvn -version
 git --version
 ```
 
+#### **4. Configuración de Email (Para Alertas)**
+Para que las alertas por email funcionen, necesitas configurar un servidor SMTP:
+
+**Opción A: Gmail (Recomendado)**
+1. Ve a [Google Account Security](https://myaccount.google.com/security)
+2. Activa la verificación en 2 pasos
+3. Genera una contraseña de aplicación para "Stark Security"
+4. Configura las variables de entorno (ver sección de configuración)
+
+**Opción B: Outlook/Hotmail**
+- Usa tu cuenta de Outlook con tu contraseña normal
+
+**Opción C: Yahoo**
+- Requiere contraseña de aplicación (similar a Gmail)
+
+📖 **Ver `EMAIL_CONFIG.md` para instrucciones detalladas**
+
 ---
 
 ## 🏃‍♂️ Cómo Iniciar la Aplicación
@@ -62,15 +79,38 @@ cd "Implementación-de-un-Sistema-de-Seguridad-Concurrente-en-Stark-Industries"
 
 #### **Paso 2: Compilar el Proyecto**
 ```bash
+mvn compile
+# O si quieres crear el JAR completo:
 mvn clean package -DskipTests
 ```
 
-#### **Paso 3: Ejecutar la Aplicación**
+#### **Paso 3: Configurar Email (Opcional pero Recomendado)**
+```bash
+# Windows (PowerShell)
+$env:MAIL_USERNAME="tu-email@gmail.com"
+$env:MAIL_PASSWORD="tu-app-password"
+$env:MAIL_FROM="tu-email@gmail.com"
+$env:MAIL_TO="tu-email@gmail.com"
+
+# Windows (CMD)
+set MAIL_USERNAME=tu-email@gmail.com
+set MAIL_PASSWORD=tu-app-password
+set MAIL_FROM=tu-email@gmail.com
+set MAIL_TO=tu-email@gmail.com
+
+# Linux/Mac
+export MAIL_USERNAME="tu-email@gmail.com"
+export MAIL_PASSWORD="tu-app-password"
+export MAIL_FROM="tu-email@gmail.com"
+export MAIL_TO="tu-email@gmail.com"
+```
+
+#### **Paso 4: Ejecutar la Aplicación**
 ```bash
 mvn spring-boot:run
 ```
 
-#### **Paso 4: Acceder a la Aplicación**
+#### **Paso 5: Acceder a la Aplicación**
 - **URL**: `http://localhost:8080/`
 - **Login**: Se redirigirá automáticamente a la página de login
 
@@ -244,6 +284,26 @@ lsof -i :8080                 # Linux/macOS
 - La aplicación usa H2 en memoria por defecto
 - No requiere configuración adicional de base de datos
 - Los datos se reinician al reiniciar la aplicación
+
+### **❌ Error: "cannot find symbol: method stream()"**
+```bash
+# Si ves este error de compilación:
+# cannot find symbol: method stream() for type Iterable<Measurement>
+
+# Solución: Ya está arreglado en el código actual
+# Si persiste, ejecuta:
+mvn clean compile
+```
+
+### **❌ Error: "Port 8080 already in use"**
+```bash
+# Detener procesos Java existentes
+Get-Process -Name "java" | Stop-Process -Force  # Windows PowerShell
+killall java                                     # Linux/macOS
+
+# O cambiar puerto en application.yml:
+# server.port: 8081
+```
 
 ---
 

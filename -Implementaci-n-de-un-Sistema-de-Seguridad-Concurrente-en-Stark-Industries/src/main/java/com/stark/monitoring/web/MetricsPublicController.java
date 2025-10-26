@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -46,7 +47,8 @@ public class MetricsPublicController {
     
     private Object getMeterValue(Meter meter) {
         try {
-            return meter.measure().stream()
+            // Convertir Iterable a Stream usando StreamSupport
+            return StreamSupport.stream(meter.measure().spliterator(), false)
                     .mapToDouble(measurement -> measurement.getValue())
                     .findFirst()
                     .orElse(0.0);

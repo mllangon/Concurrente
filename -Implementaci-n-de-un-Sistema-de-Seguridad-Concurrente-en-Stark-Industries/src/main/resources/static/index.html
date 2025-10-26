@@ -50,6 +50,45 @@
       padding: 10px;
       max-height: 300px;
     }
+    
+    /* Estilos para servicios de mensajería */
+    .status-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      min-width: 120px;
+    }
+    
+    .status-label {
+      font-weight: 500;
+      color: var(--text);
+    }
+    
+    .status-value {
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+    
+    .status-value.available {
+      background: #d4edda;
+      color: #155724;
+    }
+    
+    .status-value.unavailable {
+      background: #f8d7da;
+      color: #721c24;
+    }
+    
+    .status-value.checking {
+      background: #fff3cd;
+      color: #856404;
+    }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
@@ -91,6 +130,68 @@
       Esperando datos del sistema...
     </div>
     <canvas id="performanceChart" width="400" height="200"></canvas>
+  </div>
+  
+  <div class="card" style="margin-top: 16px;">
+    <h2 style="margin-top:0">Servicios de Mensajería</h2>
+    <div id="messagingStatus" style="margin-bottom: 16px;">
+      <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+        <div class="status-item">
+          <span class="status-label">📧 Email:</span>
+          <span id="emailStatus" class="status-value">Verificando...</span>
+        </div>
+        <div class="status-item">
+          <span class="status-label">📱 SMS:</span>
+          <span id="smsStatus" class="status-value">Verificando...</span>
+        </div>
+        <div class="status-item">
+          <span class="status-label">📲 Push:</span>
+          <span id="pushStatus" class="status-value">Verificando...</span>
+        </div>
+      </div>
+    </div>
+    <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;">
+      <button onclick="sendTestAlert('INFO')" class="btn btn-sm" style="background: #17a2b8;">Probar INFO</button>
+      <button onclick="sendTestAlert('WARN')" class="btn btn-sm" style="background: #ffc107; color: #000;">Probar WARN</button>
+      <button onclick="sendTestAlert('CRITICAL')" class="btn btn-sm" style="background: #dc3545;">Probar CRITICAL</button>
+    </div>
+    
+    <div style="border-top: 1px solid var(--border); padding-top: 16px;">
+      <h3 style="margin-top: 0; margin-bottom: 12px;">Enviar Alerta Personalizada</h3>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+        <div>
+          <label style="display: block; margin-bottom: 4px; font-size: 12px; color: var(--muted);">Sensor</label>
+          <input type="text" id="customSensor" placeholder="Nombre del sensor" style="width: 100%; padding: 6px 8px; border-radius: 4px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text);">
+        </div>
+        <div>
+          <label style="display: block; margin-bottom: 4px; font-size: 12px; color: var(--muted);">Severidad</label>
+          <select id="customSeverity" style="width: 100%; padding: 6px 8px; border-radius: 4px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text);">
+            <option value="INFO">INFO</option>
+            <option value="WARN">WARN</option>
+            <option value="CRITICAL">CRITICAL</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-bottom: 12px;">
+        <label style="display: block; margin-bottom: 4px; font-size: 12px; color: var(--muted);">Mensaje</label>
+        <input type="text" id="customMessage" placeholder="Mensaje de la alerta" style="width: 100%; padding: 6px 8px; border-radius: 4px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text);">
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+        <div>
+          <label style="display: block; margin-bottom: 4px; font-size: 12px; color: var(--muted);">📧 Emails (separados por comas)</label>
+          <input type="text" id="customEmails" placeholder="email1@test.com, email2@test.com" style="width: 100%; padding: 6px 8px; border-radius: 4px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text);">
+        </div>
+        <div>
+          <label style="display: block; margin-bottom: 4px; font-size: 12px; color: var(--muted);">📱 Teléfonos (separados por comas)</label>
+          <input type="text" id="customPhones" placeholder="+1234567890, +0987654321" style="width: 100%; padding: 6px 8px; border-radius: 4px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text);">
+        </div>
+        <div>
+          <label style="display: block; margin-bottom: 4px; font-size: 12px; color: var(--muted);">📲 Tokens Push (separados por comas)</label>
+          <input type="text" id="customTokens" placeholder="token1, token2, token3" style="width: 100%; padding: 6px 8px; border-radius: 4px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text);">
+        </div>
+      </div>
+      <button onclick="sendCustomAlert()" class="btn" style="background: #28a745; width: 100%;">Enviar Alerta Personalizada</button>
+    </div>
   </div>
 </section>
 
@@ -395,10 +496,139 @@
     }
   }
 
+  // Funciones para servicios de mensajería
+  async function loadMessagingStatus() {
+    try {
+      const res = await fetch('/api/messaging/status');
+      if (res.ok) {
+        const status = await res.json();
+        updateMessagingStatus(status);
+      }
+    } catch (error) {
+      console.log('Error loading messaging status:', error);
+    }
+  }
+
+  function updateMessagingStatus(status) {
+    const emailStatus = document.getElementById('emailStatus');
+    const smsStatus = document.getElementById('smsStatus');
+    const pushStatus = document.getElementById('pushStatus');
+
+    if (emailStatus) {
+      emailStatus.textContent = status.EMAIL ? 'Disponible' : 'No disponible';
+      emailStatus.className = 'status-value ' + (status.EMAIL ? 'available' : 'unavailable');
+    }
+
+    if (smsStatus) {
+      smsStatus.textContent = status.SMS ? 'Disponible' : 'No disponible';
+      smsStatus.className = 'status-value ' + (status.SMS ? 'available' : 'unavailable');
+    }
+
+    if (pushStatus) {
+      pushStatus.textContent = status.PUSH ? 'Disponible' : 'No disponible';
+      pushStatus.className = 'status-value ' + (status.PUSH ? 'available' : 'unavailable');
+    }
+  }
+
+  async function sendTestAlert(severity) {
+    try {
+      const res = await fetch('/api/messaging/test?severity=' + severity, {
+        method: 'POST'
+      });
+      
+      if (res.ok) {
+        const result = await res.json();
+        console.log('Alerta de prueba enviada:', result);
+        alert('Alerta de prueba ' + severity + ' enviada correctamente');
+      } else {
+        alert('Error enviando alerta de prueba');
+      }
+    } catch (error) {
+      console.log('Error sending test alert:', error);
+      alert('Error enviando alerta de prueba');
+    }
+  }
+
+  async function sendCustomAlert() {
+    try {
+      // Obtener valores del formulario
+      const sensorName = document.getElementById('customSensor').value || 'Sensor Personalizado';
+      const severity = document.getElementById('customSeverity').value;
+      const message = document.getElementById('customMessage').value || 'Alerta personalizada del sistema';
+      
+      // Procesar emails
+      const emailsStr = document.getElementById('customEmails').value;
+      const emailRecipients = emailsStr ? emailsStr.split(',').map(e => e.trim()).filter(e => e) : [];
+      
+      // Procesar teléfonos
+      const phonesStr = document.getElementById('customPhones').value;
+      const phoneNumbers = phonesStr ? phonesStr.split(',').map(p => p.trim()).filter(p => p) : [];
+      
+      // Procesar tokens push
+      const tokensStr = document.getElementById('customTokens').value;
+      const deviceTokens = tokensStr ? tokensStr.split(',').map(t => t.trim()).filter(t => t) : [];
+      
+      // Validar que al menos un destinatario esté especificado
+      if (emailRecipients.length === 0 && phoneNumbers.length === 0 && deviceTokens.length === 0) {
+        alert('Debe especificar al menos un destinatario (email, teléfono o token push)');
+        return;
+      }
+      
+      // Crear el objeto de solicitud
+      const alertRequest = {
+        sensorName: sensorName,
+        sensorType: 'TEMPERATURE', // Tipo por defecto
+        severity: severity,
+        message: message,
+        emailRecipients: emailRecipients,
+        phoneNumbers: phoneNumbers,
+        deviceTokens: deviceTokens
+      };
+      
+      console.log('Enviando alerta personalizada:', alertRequest);
+      
+      const res = await fetch('/api/messaging/send-custom', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(alertRequest)
+      });
+      
+      if (res.ok) {
+        const result = await res.json();
+        console.log('Alerta personalizada enviada:', result);
+        
+        // Mostrar resumen de envío
+        let summary = `Alerta ${severity} enviada a:\n`;
+        if (emailRecipients.length > 0) summary += `📧 ${emailRecipients.length} emails\n`;
+        if (phoneNumbers.length > 0) summary += `📱 ${phoneNumbers.length} teléfonos\n`;
+        if (deviceTokens.length > 0) summary += `📲 ${deviceTokens.length} dispositivos\n`;
+        
+        alert(summary);
+        
+        // Limpiar formulario
+        document.getElementById('customSensor').value = '';
+        document.getElementById('customMessage').value = '';
+        document.getElementById('customEmails').value = '';
+        document.getElementById('customPhones').value = '';
+        document.getElementById('customTokens').value = '';
+        
+      } else {
+        const error = await res.json();
+        alert('Error enviando alerta personalizada: ' + (error.message || 'Error desconocido'));
+      }
+    } catch (error) {
+      console.log('Error sending custom alert:', error);
+      alert('Error enviando alerta personalizada');
+    }
+  }
+
   // Init
   connect();
   loadMetrics();
   initPerformanceChart();
+  loadMessagingStatus();
   
   // Actualizar gráfico cada 2 segundos
   setInterval(updatePerformanceChart, 2000);
