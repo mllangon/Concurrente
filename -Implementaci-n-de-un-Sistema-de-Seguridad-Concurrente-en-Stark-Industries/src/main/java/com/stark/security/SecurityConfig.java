@@ -27,21 +27,31 @@ public class SecurityConfig {
                 .headers(h -> h.contentSecurityPolicy(csp -> csp
                         .policyDirectives("default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; connect-src 'self' wss:")))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/index.html", "/ws/**", "/actuator/health/**", "/api/health/**", "/swagger-ui/**", "/v3/api-docs/**", "/h2-console/**").permitAll()
+                        .requestMatchers("/login", "/login.html", "/ws/**", "/actuator/health/**", "/api/health/**", "/swagger-ui/**", "/v3/api-docs/**", "/h2-console/**").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/actuator/metrics", "/actuator/metrics/**").permitAll()
                         .requestMatchers("/api/metrics/public").permitAll()
+                        .requestMatchers("/api/sensors/public").permitAll()
+                        .requestMatchers("/api/sensors/metrics").permitAll()
                         .requestMatchers("/actuator/**").hasAnyRole("ADMIN", "SECURITY_ENGINEER")
+                        .requestMatchers("/", "/index.html").authenticated()
                         .requestMatchers("/api/**").authenticated()
-                        .anyRequest().permitAll())
+                        .anyRequest().authenticated())
                 .exceptionHandling(e -> e
                         .defaultAuthenticationEntryPointFor(
                                 new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED),
                                 new AntPathRequestMatcher("/api/**")))
                 .formLogin(form -> form
-                        .loginPage("/login")
+                        .loginPage("/login.html")
+                        .loginProcessingUrl("/login")
                         .defaultSuccessUrl("/", true)
+                        .failureUrl("/login.html?error=true")
                         .permitAll())
-                .logout(logout -> logout.logoutUrl("/logout").logoutSuccessUrl("/").permitAll());
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/login.html")
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID")
+                        .permitAll());
 
         http.headers(h -> h.frameOptions(f -> f.sameOrigin()));
         return http.build();

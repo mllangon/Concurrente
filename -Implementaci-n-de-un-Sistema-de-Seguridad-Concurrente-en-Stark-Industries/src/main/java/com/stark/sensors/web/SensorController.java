@@ -31,10 +31,15 @@ public class SensorController {
     @PreAuthorize("hasAnyRole('ADMIN','SECURITY_ENGINEER','OPERATOR','VIEWER')")
     public List<Sensor> list() { return sensorRepo.findAll(); }
 
+    @GetMapping("/public")
+    public List<Sensor> listPublic() { 
+        return sensorRepo.findAll(); 
+    }
+
     @PostMapping("/{id}/events")
     @ResponseStatus(HttpStatus.ACCEPTED)
     @PreAuthorize("hasAnyRole('ADMIN','SECURITY_ENGINEER','OPERATOR')")
-    public void ingest(@PathVariable UUID id, @RequestBody @Valid SensorEventDto dto) {
+    public void ingest(@PathVariable("id") UUID id, @RequestBody @Valid SensorEventDto dto) {
         dto.setSensorId(id);
         ingestionService.ingestAsync(dto);
     }

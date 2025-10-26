@@ -32,11 +32,16 @@ public class AlertService {
 
     @Async("sensorExecutor")
     public void sendEmailAsync(AlertMessage message) {
-        SimpleMailMessage mail = new SimpleMailMessage();
-        mail.setTo(emailTo);
-        mail.setSubject("[ALERTA] " + message.getSeverity() + " - " + message.getSensorName());
-        mail.setText(message.getMessage());
-        mailSender.send(mail);
+        try {
+            SimpleMailMessage mail = new SimpleMailMessage();
+            mail.setTo(emailTo);
+            mail.setSubject("[ALERTA] " + message.getSeverity() + " - " + message.getSensorName());
+            mail.setText(message.getMessage());
+            mailSender.send(mail);
+        } catch (Exception e) {
+            // Log error but don't fail the alert processing
+            System.err.println("Error sending email alert: " + e.getMessage());
+        }
     }
 }
 

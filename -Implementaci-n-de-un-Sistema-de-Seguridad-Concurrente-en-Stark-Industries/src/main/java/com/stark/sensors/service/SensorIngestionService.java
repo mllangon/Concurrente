@@ -2,6 +2,7 @@ package com.stark.sensors.service;
 
 import com.stark.alerts.dto.AlertMessage;
 import com.stark.alerts.service.AlertService;
+import com.stark.sensors.config.SensorBeanConfig;
 import com.stark.sensors.domain.Sensor;
 import com.stark.sensors.domain.SensorEvent;
 import com.stark.sensors.domain.SensorEvent.Severity;
@@ -12,11 +13,11 @@ import com.stark.sensors.repo.SensorRepository;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
 import java.time.Instant;
-import java.time.LocalTime;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.LinkedBlockingQueue;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -29,35 +30,23 @@ public class SensorIngestionService {
     private final AlertService alertService;
     private final MeterRegistry meterRegistry;
     private final Timer latencyTimer;
+    private final Map<SensorType, SensorService> sensorServiceRegistry;
+    private long totalEventsProcessed = 0;
 
     private final LinkedBlockingQueue<SensorEventDto> queue = new LinkedBlockingQueue<>();
-
-    private final LocalTime offStart;
-    private final LocalTime offEnd;
-    private final int warnTemp;
-    private final int criticalHigh;
-    private final int criticalLow;
 
     public SensorIngestionService(
             SensorRepository sensorRepo,
             SensorEventRepository eventRepo,
             AlertService alertService,
             MeterRegistry meterRegistry,
-            @Value("${app.sensors.motion.off-hours.start}") String offStart,
-            @Value("${app.sensors.motion.off-hours.end}") String offEnd,
-            @Value("${app.sensors.temperature.warn-threshold}") int warnTemp,
-            @Value("${app.sensors.temperature.critical-high}") int criticalHigh,
-            @Value("${app.sensors.temperature.critical-low}") int criticalLow) {
+            @Autowired Map<SensorType, SensorService> sensorServiceRegistry) {
         this.sensorRepo = sensorRepo;
         this.eventRepo = eventRepo;
         this.alertService = alertService;
         this.meterRegistry = meterRegistry;
         this.latencyTimer = meterRegistry.timer("sensor.events.latency");
-        this.offStart = LocalTime.parse(offStart);
-        this.offEnd = LocalTime.parse(offEnd);
-        this.warnTemp = warnTemp;
-        this.criticalHigh = criticalHigh;
-        this.criticalLow = criticalLow;
+        this.sensorServiceRegistry = sensorServiceRegistry;
     }
 
     public void enqueue(SensorEventDto dto) {
@@ -88,12 +77,18 @@ public class SensorIngestionService {
             event.setType(dto.getType());
             event.setValue(dto.getValue());
 
-            Severity severity = evaluateSeverity(dto);
+            // Usar severidad del DTO si está presente, o calcularla si no
+            Severity severity = dto.getSeverity() != null ? dto.getSeverity() : evaluateSeverity(dto);
             event.setSeverity(severity);
             event.setTs(Instant.now());
             eventRepo.save(event);
 
+            // Incrementar contador total
+            totalEventsProcessed++;
+            
+            // Registrar métricas
             meterRegistry.counter("sensor.events.processed", "type", event.getType().name(), "severity", severity.name()).increment();
+            meterRegistry.gauge("sensor.events.processed.total", totalEventsProcessed);
 
             if (severity == Severity.WARN || severity == Severity.CRITICAL) {
                 AlertMessage msg = new AlertMessage(UUID.randomUUID(), sensor.getName(), event.getType(), severity,
@@ -110,37 +105,35 @@ public class SensorIngestionService {
     }
 
     private Severity evaluateSeverity(SensorEventDto dto) {
-        if (dto.getType() == SensorType.MOTION) {
-            boolean motion = "MOTION_DETECTED".equalsIgnoreCase(dto.getValue());
-            if (motion) {
-                if (isOffHours()) return Severity.CRITICAL; else return Severity.WARN;
-            }
-            return Severity.INFO;
+        // Usar IoC para obtener el servicio específico del sensor
+        SensorService sensorService = sensorServiceRegistry.get(dto.getType());
+        
+        if (sensorService == null) {
+            return Severity.INFO; // Tipo de sensor no soportado
         }
-        if (dto.getType() == SensorType.TEMPERATURE) {
-            try {
-                int temp = Integer.parseInt(dto.getValue());
-                if (temp < criticalLow || temp > criticalHigh) return Severity.CRITICAL;
-                if (temp >= warnTemp) return Severity.WARN;
-                return Severity.INFO;
-            } catch (NumberFormatException ex) {
+        
+        // Delegar el procesamiento al bean específico del sensor
+        String severityString = sensorService.processEvent(dto);
+        
+        // Convertir string a enum Severity
+        switch (severityString.toUpperCase()) {
+            case "CRITICAL":
+                return Severity.CRITICAL;
+            case "WARN":
                 return Severity.WARN;
-            }
+            case "ERROR":
+                return Severity.WARN; // Mapear ERROR a WARN
+            default:
+                return Severity.INFO;
         }
-        if (dto.getType() == SensorType.ACCESS) {
-            boolean authorized = Boolean.parseBoolean(dto.getValue());
-            return authorized ? Severity.INFO : Severity.CRITICAL;
-        }
-        return Severity.INFO;
     }
-
-    private boolean isOffHours() {
-        LocalTime now = LocalTime.now();
-        if (offStart.isBefore(offEnd)) {
-            return now.isAfter(offStart) && now.isBefore(offEnd);
-        } else {
-            return now.isAfter(offStart) || now.isBefore(offEnd);
-        }
+    
+    public long getTotalEventsProcessed() {
+        return totalEventsProcessed;
+    }
+    
+    public double getAverageLatency() {
+        return latencyTimer.mean(java.util.concurrent.TimeUnit.MILLISECONDS);
     }
 }
 
