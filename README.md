@@ -96,7 +96,7 @@ mvn spring-boot:run
 
 ---
 
-## 4) Organización de la práctica (qué se hizo y para qué)
+## 4) Organización de la práctica 
 
 - Autenticación y autorización (Spring Security)
   - `SecurityFilterChain` protege rutas, login en `/login.html`, logout y manejo de 401/403
