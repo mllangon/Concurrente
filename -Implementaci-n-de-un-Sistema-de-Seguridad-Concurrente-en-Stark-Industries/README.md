@@ -1,21 +1,6 @@
-# 🛡️ Sistema de Seguridad Concurrente - Stark Industries
+# Sistema de Seguridad Concurrente - Stark Industries
 
-## 📋 Descripción del Proyecto
-
-Sistema de seguridad empresarial desarrollado con **Spring Boot 3.3** que procesa eventos de múltiples sensores en tiempo real, implementando concurrencia, autenticación/autorización, alertas en tiempo real y monitoreo de rendimiento.
-
-### 🎯 Objetivos Cumplidos
-
-✅ **Procesamiento Concurrente**: Utiliza `@Async` y `ThreadPoolTaskExecutor` para manejar múltiples eventos simultáneamente  
-✅ **Inversión de Control (IoC)**: Beans específicos para cada tipo de sensor (MOTION, TEMPERATURE, ACCESS)  
-✅ **Spring Security**: Autenticación y autorización con roles (ADMIN, SECURITY_ENGINEER, OPERATOR, VIEWER)  
-✅ **Notificaciones en Tiempo Real**: WebSocket (STOMP) para alertas inmediatas  
-✅ **Monitorización**: Spring Actuator, métricas personalizadas y gráfico de rendimiento en tiempo real  
-✅ **Logging Eficiente**: Logback con formato JSON-friendly para rastreo de eventos  
-
----
-
-## 🚀 Instalación y Configuración
+## 1) Requisitos para iniciar la aplicación e instalación
 
 ### 📋 Prerrequisitos
 
@@ -68,7 +53,7 @@ Para que las alertas por email funcionen, necesitas configurar un servidor SMTP:
 
 ---
 
-## 🏃‍♂️ Cómo Iniciar la Aplicación
+## 2) Cómo iniciar la aplicación
 
 ### **Método 1: Ejecución Directa (Recomendado)**
 
@@ -149,7 +134,7 @@ java -jar target/*.jar
 
 ---
 
-## 🔐 Credenciales de Acceso
+## 3) Credenciales de acceso
 
 | Usuario | Contraseña | Rol | Permisos |
 |---------|------------|-----|----------|
@@ -159,7 +144,45 @@ java -jar target/*.jar
 
 ---
 
-## 🏗️ Arquitectura del Sistema
+## 4) Organización de la práctica (qué se hizo y para qué)
+
+- Autenticación y autorización (Spring Security)
+  - `SecurityFilterChain` protege rutas, login en `/login.html`, logout y manejo de 401/403
+  - `LoginSuccessHandler` registra automáticamente cada inicio de sesión como `AccessLog`, con ubicación por rol e IP normalizada
+- Accesos (Access Logs)
+  - `AccessController`: `POST /api/access/logs` (ADMIN, OPERATOR) y `GET /api/access/logs` (ADMIN, OPERATOR)
+  - Frontend: formulario “Agregar acceso”; envío de `personId` y `personName` (evita `null`)
+- Sensores y eventos
+  - `SensorIngestionService` con cola y `@Async` para ingesta concurrente
+  - IoC: `Map<SensorType, SensorService)` para lógica por tipo
+  - DTO con `severity`; pruebas de carga con generación de N eventos aleatorios
+- Alertas en tiempo real
+  - WebSocket (STOMP) para notificaciones cuando la severidad es WARN/CRITICAL
+  - Servicios de mensajería: solo Email; SMS/Push eliminados
+- Email
+  - `JavaMailSender` vía SMTP (Gmail/Outlook). Configurable por variables de entorno o `application.yml`
+  - Se retiró la configuración temporal en UI; ahora se documenta el cambio por código/config
+- Métricas y monitorización
+  - Spring Actuator + métricas personalizadas (eventos procesados, latencia)
+  - Gráfico en tiempo real (Chart.js) y KPIs en el dashboard
+- Frontend y UX
+  - Botones unificados (`tab-btn` + variantes), sin emojis
+  - Footer limpio y panel Swagger compacto al final del Dashboard
+  - Mensajes y notificaciones profesionales
+
+## 5) Resumen de roles: por qué y qué puede cada uno
+
+- ADMIN
+  - Por qué: rol de gobierno del sistema y auditoría
+  - Puede: todo (eventos, accesos, métricas, configuración)
+- SECURITY_ENGINEER
+  - Por qué: centrado en eventos y seguridad operativa
+  - Puede: crear y ver eventos; ver métricas
+  - No puede: ver/crear accesos
+- OPERATOR
+  - Por qué: operación diaria y control de accesos
+  - Puede: crear y ver accesos; ver eventos
+  - No puede: crear sensores nuevos ni cambiar configuración
 
 ### **📁 Estructura del Proyecto**
 
@@ -338,7 +361,7 @@ killall java                                     # Linux/macOS
 
 ---
 
-## 🧪 Cómo Probar el Sistema
+## 6) Cómo probar el sistema
 ### ✉️ Cambiar el correo de envío/recepción
 
 Esta versión no expone un panel para cambiar el email desde el dashboard. Para modificarlo:
@@ -373,13 +396,9 @@ Tras el cambio, reinicia la aplicación.
 
 ---
 
-## 👥 Equipo de Desarrollo
+## 7) Hecho por
 
-### **Roles y Responsabilidades**
-- **Desarrollador Backend**: Implementación de servicios y lógica de procesamiento concurrente
-- **Ingeniero de Seguridad**: Configuración de autenticación y autorización
-- **Desarrollador Frontend**: Interfaz de usuario y notificaciones en tiempo real
-- **Administrador de Sistemas**: Configuración y monitorización del sistema
+Sergio Martín Rosales, Miguel De Dios y Mario Llansó González-Anleo
 
 ---
 

@@ -31,8 +31,16 @@
     header h1 { margin: 0; font-size: 22px; letter-spacing: .2px; }
     main { padding: 24px; max-width: 1200px; margin: 0 auto; }
     nav { display: flex; gap: 8px; }
-    .tab-btn { background: #0f1a36; color: var(--text); border: 1px solid #233056; padding: 8px 12px; border-radius: 8px; cursor: pointer; }
+    .tab-btn { background: #0f1a36; color: var(--text); border: 1px solid #233056; padding: 8px 12px; border-radius: 8px; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; font-size: 14px; line-height: 1; }
     .tab-btn:hover { border-color: var(--accent); }
+    .tab-btn.danger { color: #fff; border-color: #3a1b1b; background: #2a0f10; }
+    .tab-btn.danger:hover { border-color: #ff5c5c; box-shadow: 0 0 0 3px rgba(255,92,92,.15); }
+    .tab-btn.info { border-color: #1e3b52; background: #0f1e2a; }
+    .tab-btn.info:hover { border-color: #13b3ff; box-shadow: 0 0 0 3px rgba(19,179,255,.15); }
+    .tab-btn.warning { border-color: #4b3b1a; background: #21190a; }
+    .tab-btn.warning:hover { border-color: #ffbf47; box-shadow: 0 0 0 3px rgba(255,191,71,.15); }
+    .tab-btn.success { border-color: #1e3b2a; background: #0f1d14; }
+    .tab-btn.success:hover { border-color: #28a745; box-shadow: 0 0 0 3px rgba(40,167,69,.15); }
     a { color: var(--accent); text-decoration: none; }
     footer { max-width: 1200px; margin: 24px auto; padding: 12px 24px; color: var(--muted); display: flex; justify-content: space-between; align-items: center; background: rgba(14, 21, 48, .95); border-top: 1px solid #1d2542; border-radius: 8px; position: relative; z-index: 2; backdrop-filter: none; }
     .footer-right a { color: var(--accent); }
@@ -152,7 +160,7 @@
     <button class="tab-btn" data-tab="tab-dashboard">Dashboard</button>
     <button class="tab-btn" data-tab="tab-events">Eventos</button>
     <button class="tab-btn" data-tab="tab-access">Accesos</button>
-    <a href="/logout" style="margin-left:8px; color: var(--crit);">Cerrar Sesión</a>
+    <a class="tab-btn danger" href="/logout" style="margin-left:8px;">Cerrar Sesión</a>
   </nav>
   </header>
 <main>
@@ -210,36 +218,30 @@
         <label style="color: var(--muted);">Cantidad de eventos:</label>
         <input type="number" id="testEventCount" value="100" min="1" max="1000" 
                style="width: 80px; padding: 6px 8px; border-radius: 4px; border: 1px solid #233056; background: #0f1a36; color: var(--text);">
-        <button onclick="generateTestEvents()" id="btnGenerateEvents" 
-                style="background: #dc3545; color: white; padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer;">
-          🚀 Generar Eventos
-        </button>
-        <button onclick="checkSensorCount()" 
-                style="background: #17a2b8; color: white; padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer;">
-          📊 Ver Sensores
-        </button>
+        <button onclick="generateTestEvents()" id="btnGenerateEvents" class="tab-btn success">Generar eventos</button>
+        <button onclick="checkSensorCount()" class="tab-btn info">Ver sensores</button>
       </div>
       <div id="testResults" style="padding: 12px; background: rgba(13,21,46,.8); border-radius: 6px; font-family: monospace; font-size: 12px; color: #cbd6f6; min-height: 60px;">
         Haz clic en "Generar Eventos" para probar la capacidad de carga del sistema...
       </div>
-    </div>
+  </div>
   
-        
-
+  
+  
         <div class="card" style="margin-top: 16px;">
           <h2 style="margin-top:0">Servicios de Mensajería</h2>
     <div id="messagingStatus" style="margin-bottom: 16px;">
       <div style="display: flex; gap: 16px; flex-wrap: wrap;">
         <div class="status-item">
-          <span class="status-label">📧 Email:</span>
+          <span class="status-label">Email:</span>
           <span id="emailStatus" class="status-value">Verificando...</span>
         </div>
       </div>
     </div>
     <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;">
-      <button onclick="sendTestAlert('INFO')" class="btn btn-sm" style="background: #17a2b8;">Probar INFO</button>
-      <button onclick="sendTestAlert('WARN')" class="btn btn-sm" style="background: #ffc107; color: #000;">Probar WARN</button>
-      <button onclick="sendTestAlert('CRITICAL')" class="btn btn-sm" style="background: #dc3545;">Probar CRITICAL</button>
+      <button onclick="sendTestAlert('INFO')" class="tab-btn info">Probar INFO</button>
+      <button onclick="sendTestAlert('WARN')" class="tab-btn warning">Probar WARN</button>
+      <button onclick="sendTestAlert('CRITICAL')" class="tab-btn danger">Probar CRITICAL</button>
     </div>
     
     <div style="border-top: 1px solid var(--border); padding-top: 16px;">
@@ -263,10 +265,21 @@
         <input type="text" id="customMessage" placeholder="Mensaje de la alerta" style="width: 100%; padding: 6px 8px; border-radius: 4px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text);">
       </div>
           <div style="margin-bottom: 12px;">
-            <label style="display: block; margin-bottom: 4px; font-size: 12px; color: var(--muted);">📧 Emails (opcional - si no se especifica, usa configuración por defecto)</label>
+            <label style="display: block; margin-bottom: 4px; font-size: 12px; color: var(--muted);">Emails (opcional - si no se especifica, usa configuración por defecto)</label>
             <input type="text" id="customEmails" placeholder="Dejar vacío para usar llansoanleo.mario@gmail.com" style="width: 100%; padding: 6px 8px; border-radius: 4px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text);">
           </div>
       <button onclick="sendCustomAlert()" class="btn" style="background: #28a745; width: 100%;">Enviar Alerta Personalizada</button>
+    </div>
+  </div>
+
+  <!-- API compact card as the last item of dashboard -->
+  <div class="card" style="margin-top: 12px; padding: 8px 12px;">
+    <div style="display:flex; align-items:center; justify-content: space-between; gap: 12px;">
+      <div style="display:flex; align-items:center; gap: 8px; color: var(--muted);">
+        <strong style="font-size:14px; color: var(--text);">API</strong>
+        <span>Documentación Swagger de la API REST.</span>
+      </div>
+      <a class="tab-btn info" href="/swagger-ui/index.html" target="_blank">Abrir Swagger</a>
     </div>
   </div>
 </section>
@@ -714,9 +727,9 @@
         // Mostrar resumen de envío
         let summary = `Alerta ${severity} enviada a:\n`;
         if (emailRecipients.length > 0) {
-          summary += `📧 ${emailRecipients.length} emails personalizados\n`;
+          summary += `${emailRecipients.length} emails personalizados\n`;
         } else {
-          summary += `📧 Email por defecto (llansoanleo.mario@gmail.com)\n`;
+          summary += `Email por defecto (llansoanleo.mario@gmail.com)\n`;
         }
         
         alert(summary);
@@ -1113,12 +1126,6 @@
   </form>
 </div>
  </main>
- <footer>
-   <div class="footer-left">© Stark Security</div>
-   <div class="footer-right">
-     <a href="/swagger-ui/index.html" target="_blank">Swagger</a>
-   </div>
- </footer>
  </body>
  </html>
 
