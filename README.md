@@ -121,7 +121,7 @@ mvn spring-boot:run
   - Botones unificados (`tab-btn` + variantes)
   - Footer limpio y panel Swagger compacto al final del Dashboard
 
-## 5) Resumen de roles: por qué y qué puede cada uno
+## 5) Resumen de roles
 
 - ADMIN
   - Por qué: rol de gobierno del sistema y auditoría
