@@ -22,7 +22,7 @@ public class AccessController {
 
     @PostMapping("/logs")
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("hasAnyRole('ADMIN','SECURITY_ENGINEER','OPERATOR')")
+    @PreAuthorize("hasAnyRole('ADMIN','OPERATOR')")
     public AccessLog log(@RequestBody @Valid AccessLog log) {
         if (!log.isAuthorized()) {
             meterRegistry.counter("access.denied").increment();
@@ -31,7 +31,7 @@ public class AccessController {
     }
 
     @GetMapping("/logs")
-    @PreAuthorize("hasAnyRole('ADMIN','SECURITY_ENGINEER','OPERATOR','VIEWER')")
+    @PreAuthorize("hasAnyRole('ADMIN','OPERATOR')")
     public List<AccessLog> list() { return repo.findAll(); }
 }
 

@@ -28,7 +28,7 @@ public class SensorController {
     public Sensor create(@RequestBody @Valid Sensor sensor) { return sensorRepo.save(sensor); }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN','SECURITY_ENGINEER','OPERATOR','VIEWER')")
+    @PreAuthorize("hasAnyRole('ADMIN','SECURITY_ENGINEER','OPERATOR')")
     public List<Sensor> list() { return sensorRepo.findAll(); }
 
     @GetMapping("/public")
@@ -38,7 +38,7 @@ public class SensorController {
 
     @PostMapping("/{id}/events")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    @PreAuthorize("hasAnyRole('ADMIN','SECURITY_ENGINEER','OPERATOR')")
+    @PreAuthorize("hasAnyRole('ADMIN','SECURITY_ENGINEER')")
     public void ingest(@PathVariable("id") UUID id, @RequestBody @Valid SensorEventDto dto) {
         dto.setSensorId(id);
         ingestionService.ingestAsync(dto);

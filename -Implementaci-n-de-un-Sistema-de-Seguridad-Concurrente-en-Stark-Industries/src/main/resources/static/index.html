@@ -8,7 +8,8 @@
   <style>
     :root { --bg:#0b1020; --card:#111931; --muted:#a8b3cf; --text:#e6edf7; --accent:#13b3ff; --warn:#ffbf47; --crit:#ff5c5c; }
     * { box-sizing: border-box; }
-    body { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial; margin: 0; background: var(--bg); color: var(--text); }
+    body { font-family: "Zalando Sans Expanded", Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial; margin: 0; background: var(--bg); color: var(--text); }
+    h1, h2, h3, h4, h5, h6 { font-family: "Zalando Sans Expanded", Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial; }
     /* Background layer (non-intrusive, behind all content) */
     .bg { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
     .bg-gradient { position: absolute; inset: -20%; background: radial-gradient(60% 60% at 10% 10%, rgba(19,179,255,.15) 0%, transparent 60%),
@@ -33,6 +34,8 @@
     .tab-btn { background: #0f1a36; color: var(--text); border: 1px solid #233056; padding: 8px 12px; border-radius: 8px; cursor: pointer; }
     .tab-btn:hover { border-color: var(--accent); }
     a { color: var(--accent); text-decoration: none; }
+    footer { max-width: 1200px; margin: 24px auto; padding: 12px 24px; color: var(--muted); display: flex; justify-content: space-between; align-items: center; background: rgba(14, 21, 48, .95); border-top: 1px solid #1d2542; border-radius: 8px; position: relative; z-index: 2; backdrop-filter: none; }
+    .footer-right a { color: var(--accent); }
     .card { background: rgba(17, 25, 49, .85); backdrop-filter: blur(8px) saturate(120%); border: 1px solid #1e2a4a; border-radius: 12px; padding: 16px; box-shadow: 0 6px 18px rgba(0,0,0,.25); }
     .grid { display: grid; gap: 16px; }
     .grid-2 { grid-template-columns: 2fr 1fr; }
@@ -108,6 +111,14 @@
       background: #fff3cd;
       color: #856404;
     }
+    /* Scroll panel for warnings/alerts */
+    .scroll-y { max-height: 320px; overflow: auto; border: 1px solid #203059; border-radius: 8px; }
+    /* KPI tiles */
+    .kpis { display: grid; grid-template-columns: repeat(4, minmax(160px, 1fr)); gap: 12px; }
+    .kpi { background: rgba(17, 25, 49, .85); backdrop-filter: blur(8px) saturate(120%); border: 1px solid #1e2a4a; border-radius: 12px; padding: 14px; }
+    .kpi .kpi-label { color: var(--muted); font-size: 12px; margin-bottom: 6px; }
+    .kpi .kpi-value { font-size: 22px; font-weight: 700; }
+    .kpi .kpi-sub { color: var(--muted); font-size: 12px; margin-top: 4px; }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
@@ -141,7 +152,6 @@
     <button class="tab-btn" data-tab="tab-dashboard">Dashboard</button>
     <button class="tab-btn" data-tab="tab-events">Eventos</button>
     <button class="tab-btn" data-tab="tab-access">Accesos</button>
-    <a href="/swagger-ui/index.html" target="_blank" style="margin-left:8px">Swagger</a>
     <a href="/logout" style="margin-left:8px; color: var(--crit);">Cerrar Sesión</a>
   </nav>
   </header>
@@ -152,46 +162,69 @@
     <div class="card">
       <h2 style="margin-top:0">Live Alerts</h2>
       <div id="status">Conectando...</div>
-      <table id="alerts">
-        <thead><tr><th>Timestamp</th><th>Sensor</th><th>Tipo</th><th>Severidad</th><th>Mensaje</th></tr></thead>
-        <tbody></tbody>
-      </table>
+      <div class="scroll-y">
+        <table id="alerts">
+          <thead><tr><th>Timestamp</th><th>Sensor</th><th>Tipo</th><th>Severidad</th><th>Mensaje</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
     </div>
     <div class="card metrics">
       <h3 style="margin-top:0">Métricas</h3>
       <pre id="metricsPre">Cargando métricas...</pre>
     </div>
   </div>
-  <div class="card" style="margin-top: 16px;">
-    <h2 style="margin-top:0">Rendimiento del Sistema en Tiempo Real</h2>
-    <div id="chartStatus" style="color: var(--muted); font-size: 14px; margin-bottom: 10px;">
-      Esperando datos del sistema...
+  <div class="kpis" style="margin-top:16px">
+    <div class="kpi">
+      <div class="kpi-label">Eventos procesados</div>
+      <div class="kpi-value" id="kpiTotalEvents">0</div>
+      <div class="kpi-sub">Total</div>
     </div>
-    <canvas id="performanceChart" width="400" height="200"></canvas>
+    <div class="kpi">
+      <div class="kpi-label">Eventos por segundo</div>
+      <div class="kpi-value" id="kpiEps">0.0</div>
+      <div class="kpi-sub">Últimos 2s</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Latencia promedio</div>
+      <div class="kpi-value" id="kpiLatency">0 ms</div>
+      <div class="kpi-sub">Procesamiento</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Accesos denegados</div>
+      <div class="kpi-value" id="kpiAccessDenied">0</div>
+      <div class="kpi-sub">Desde inicio</div>
+    </div>
   </div>
+    <div class="card" style="margin-top: 16px;">
+      <h2 style="margin-top:0">Rendimiento del Sistema en Tiempo Real</h2>
+      <div id="chartStatus" style="color: var(--muted); font-size: 14px; margin-bottom: 10px;">
+        Esperando datos del sistema...
+      </div>
+      <canvas id="performanceChart" width="400" height="200"></canvas>
+    </div>
+    
+    <div class="card" style="margin-top: 16px;">
+      <h2 style="margin-top:0">Pruebas de Carga</h2>
+      <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 16px;">
+        <label style="color: var(--muted);">Cantidad de eventos:</label>
+        <input type="number" id="testEventCount" value="100" min="1" max="1000" 
+               style="width: 80px; padding: 6px 8px; border-radius: 4px; border: 1px solid #233056; background: #0f1a36; color: var(--text);">
+        <button onclick="generateTestEvents()" id="btnGenerateEvents" 
+                style="background: #dc3545; color: white; padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer;">
+          🚀 Generar Eventos
+        </button>
+        <button onclick="checkSensorCount()" 
+                style="background: #17a2b8; color: white; padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer;">
+          📊 Ver Sensores
+        </button>
+      </div>
+      <div id="testResults" style="padding: 12px; background: rgba(13,21,46,.8); border-radius: 6px; font-family: monospace; font-size: 12px; color: #cbd6f6; min-height: 60px;">
+        Haz clic en "Generar Eventos" para probar la capacidad de carga del sistema...
+      </div>
+    </div>
   
-        <div class="card" style="margin-top: 16px;">
-          <h2 style="margin-top:0">Configuración de Email</h2>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
-            <div>
-              <label style="display: block; margin-bottom: 4px; font-size: 12px; color: var(--muted);">Email de Origen</label>
-              <input type="email" id="configEmailFrom" placeholder="tu-email@ejemplo.com" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text);">
-            </div>
-            <div>
-              <label style="display: block; margin-bottom: 4px; font-size: 12px; color: var(--muted);">Email de Destino</label>
-              <input type="email" id="configEmailTo" placeholder="destino@ejemplo.com" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text);">
-            </div>
-          </div>
-          <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;">
-            <button onclick="setTemporaryEmails()" class="btn btn-sm" style="background: #17a2b8;">Aplicar Temporal</button>
-            <button onclick="savePermanentEmails()" class="btn btn-sm" style="background: #28a745;">Guardar Permanente</button>
-            <button onclick="resetEmailConfig()" class="btn btn-sm" style="background: #6c757d;">Resetear</button>
-            <button onclick="loadEmailConfig()" class="btn btn-sm" style="background: #ffc107; color: #000;">Cargar Config</button>
-          </div>
-          <div id="emailConfigStatus" style="padding: 8px; border-radius: 4px; background: var(--bg-secondary); font-size: 12px; color: var(--muted);">
-            Cargando configuración...
-          </div>
-        </div>
+        
 
         <div class="card" style="margin-top: 16px;">
           <h2 style="margin-top:0">Servicios de Mensajería</h2>
@@ -280,6 +313,21 @@
 <section id="tab-access" class="tab">
   <div class="card">
     <h2 style="margin-top:0">Accesos</h2>
+    <div class="card" style="margin-bottom:12px; background:#0e1530">
+      <div class="controls" style="flex-wrap:wrap">
+        <strong style="margin-right:8px">Agregar acceso</strong>
+        <label>Persona</label>
+        <input id="accessPerson" placeholder="Nombre de la persona" style="width:200px; background:#0f1a36; color:#e6edf7; border:1px solid #233056; padding:8px 10px; border-radius:8px" />
+        <label>Ubicación</label>
+        <input id="accessLocation" placeholder="Ubicación" style="width:200px; background:#0f1a36; color:#e6edf7; border:1px solid #233056; padding:8px 10px; border-radius:8px" />
+        <label>Autorizado</label>
+        <select id="accessAuthorized" style="min-width:120px; background:#0f1a36; color:#e6edf7; border:1px solid #233056; padding:8px 10px; border-radius:8px">
+          <option value="true">Sí</option>
+          <option value="false">No</option>
+        </select>
+        <button id="btnAddAccess">Enviar</button>
+      </div>
+    </div>
     <table id="accessTable">
       <thead><tr><th>Ts</th><th>Persona</th><th>Autorizado</th><th>Ubicación</th></tr></thead>
       <tbody></tbody>
@@ -337,7 +385,7 @@
       if (res.status === 401 || res.status === 403 || res.status === 302) { return showLogin(loadEvents); }
       if (!res.ok) { 
         const errorText = await res.text();
-        alert('Error cargando eventos (HTTP '+res.status+'): ' + errorText); 
+        showErrorMessage('Error cargando eventos (HTTP '+res.status+'): ' + errorText); 
         return; 
       }
       const data = await res.json();
@@ -352,16 +400,21 @@
       });
     } catch (error) {
       console.error('Error loading events:', error);
-      alert('Error cargando eventos: ' + error.message);
+      showErrorMessage('Error cargando eventos: ' + error.message);
     }
   }
   async function loadAccess() {
     try {
       const res = await fetch('/api/access/logs', { redirect: 'manual', credentials: 'same-origin' });
-      if (res.status === 401 || res.status === 403 || res.status === 302) { return showLogin(loadAccess); }
+      if (res.status === 401 || res.status === 302) { return showLogin(loadAccess); }
+      if (res.status === 403) {
+        const errorData = await res.json().catch(() => ({}));
+        showErrorMessage(errorData.message || 'No autorizado para ver accesos');
+        return;
+      }
       if (!res.ok) { 
         const errorText = await res.text();
-        alert('Error cargando accesos (HTTP '+res.status+'): ' + errorText); 
+        showErrorMessage('Error cargando accesos (HTTP '+res.status+'): ' + errorText); 
         return; 
       }
       const data = await res.json();
@@ -375,7 +428,7 @@
       });
     } catch (error) {
       console.error('Error loading access:', error);
-      alert('Error cargando accesos: ' + error.message);
+      showErrorMessage('Error cargando accesos: ' + error.message);
     }
   }
 
@@ -501,6 +554,9 @@
         const eventsProcessed = metrics.sensor_events_processed_total || 0;
         const latency = metrics.sensor_events_latency_ms || 0;
         
+        // Actualizar KPIs de sensores
+        updateKpisFromSensorMetrics(eventsProcessed, latency);
+
         // Solo agregar datos si hay métricas reales
         if (eventsProcessed > 0 || latency > 0) {
           const now = new Date();
@@ -537,6 +593,45 @@
       document.getElementById('chartStatus').textContent = 
         'Error obteniendo métricas del sistema';
     }
+  }
+
+  // Estado previo para calcular EPS
+  let prevEventsProcessed = null;
+  let prevEpsTs = null;
+
+  function updateKpisFromSensorMetrics(eventsProcessed, latencyMs) {
+    // Total
+    const elTotal = document.getElementById('kpiTotalEvents');
+    if (elTotal) elTotal.textContent = Number(eventsProcessed).toLocaleString();
+
+    // EPS calculado por delta/tiempo
+    const now = Date.now();
+    let eps = 0;
+    if (prevEventsProcessed !== null && prevEpsTs !== null && eventsProcessed >= prevEventsProcessed) {
+      const deltaCount = eventsProcessed - prevEventsProcessed;
+      const deltaSec = Math.max(0.001, (now - prevEpsTs) / 1000);
+      eps = deltaCount / deltaSec;
+    }
+    prevEventsProcessed = eventsProcessed;
+    prevEpsTs = now;
+    const elEps = document.getElementById('kpiEps');
+    if (elEps) elEps.textContent = eps.toFixed(2);
+
+    // Latencia
+    const elLat = document.getElementById('kpiLatency');
+    if (elLat) elLat.textContent = `${Number(latencyMs).toFixed(1)} ms`;
+  }
+
+  async function updateAccessDeniedKpi() {
+    try {
+      const res = await fetch('/actuator/metrics/access.denied', { credentials: 'same-origin', redirect: 'manual' });
+      if (!res.ok) return;
+      const data = await res.json();
+      // Buscar primer valor de medición
+      const value = (data.measurements && data.measurements.length > 0) ? (data.measurements[0].value || 0) : 0;
+      const el = document.getElementById('kpiAccessDenied');
+      if (el) el.textContent = Number(value).toLocaleString();
+    } catch {}
   }
 
   // Funciones para servicios de mensajería
@@ -641,129 +736,18 @@
     }
   }
 
-  // Funciones para configuración de email
-  async function loadEmailConfig() {
-    try {
-      const response = await fetch('/api/email-config/current');
-      const config = await response.json();
-      
-      document.getElementById('configEmailFrom').value = config.emailFrom || '';
-      document.getElementById('configEmailTo').value = config.emailTo || '';
-      
-      const status = document.getElementById('emailConfigStatus');
-      status.textContent = `Configuración actual: ${config.emailFrom} → ${config.emailTo} ${config.isTemporary === 'true' ? '(Temporal)' : '(Permanente)'}`;
-      status.style.background = config.isTemporary === 'true' ? '#fff3cd' : '#d4edda';
-      status.style.color = config.isTemporary === 'true' ? '#856404' : '#155724';
-      
-    } catch (error) {
-      console.error('Error loading email config:', error);
-      document.getElementById('emailConfigStatus').textContent = 'Error cargando configuración';
-      document.getElementById('emailConfigStatus').style.background = '#f8d7da';
-      document.getElementById('emailConfigStatus').style.color = '#721c24';
-    }
-  }
-  
-  async function setTemporaryEmails() {
-    const emailFrom = document.getElementById('configEmailFrom').value.trim();
-    const emailTo = document.getElementById('configEmailTo').value.trim();
-    
-    if (!emailFrom || !emailTo) {
-      alert('Por favor completa ambos campos de email');
-      return;
-    }
-    
-    try {
-      const response = await fetch('/api/email-config/set-temporary', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: `emailFrom=${encodeURIComponent(emailFrom)}&emailTo=${encodeURIComponent(emailTo)}`
-      });
-      
-      const result = await response.json();
-      
-      if (result.success) {
-        document.getElementById('emailConfigStatus').textContent = `✅ Configuración temporal aplicada: ${emailFrom} → ${emailTo}`;
-        document.getElementById('emailConfigStatus').style.background = '#d4edda';
-        document.getElementById('emailConfigStatus').style.color = '#155724';
-      } else {
-        alert('Error: ' + result.message);
-      }
-      
-    } catch (error) {
-      console.error('Error setting temporary emails:', error);
-      alert('Error aplicando configuración temporal');
-    }
-  }
-  
-  async function savePermanentEmails() {
-    const emailFrom = document.getElementById('configEmailFrom').value.trim();
-    const emailTo = document.getElementById('configEmailTo').value.trim();
-    
-    if (!emailFrom || !emailTo) {
-      alert('Por favor completa ambos campos de email');
-      return;
-    }
-    
-    try {
-      const response = await fetch('/api/email-config/save-permanent', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: `emailFrom=${encodeURIComponent(emailFrom)}&emailTo=${encodeURIComponent(emailTo)}`
-      });
-      
-      const result = await response.json();
-      
-      if (result.success) {
-        document.getElementById('emailConfigStatus').textContent = `💾 Configuración guardada permanentemente: ${emailFrom} → ${emailTo}`;
-        document.getElementById('emailConfigStatus').style.background = '#d1ecf1';
-        document.getElementById('emailConfigStatus').style.color = '#0c5460';
-      } else {
-        alert('Error: ' + result.message);
-      }
-      
-    } catch (error) {
-      console.error('Error saving permanent emails:', error);
-      alert('Error guardando configuración permanente');
-    }
-  }
-  
-  async function resetEmailConfig() {
-    try {
-      const response = await fetch('/api/email-config/reset', {
-        method: 'POST'
-      });
-      
-      const result = await response.json();
-      
-      if (result.success) {
-        document.getElementById('configEmailFrom').value = result.config.emailFrom || '';
-        document.getElementById('configEmailTo').value = result.config.emailTo || '';
-        document.getElementById('emailConfigStatus').textContent = '🔄 Configuración reseteada a valores por defecto';
-        document.getElementById('emailConfigStatus').style.background = '#f8d7da';
-        document.getElementById('emailConfigStatus').style.color = '#721c24';
-      } else {
-        alert('Error reseteando configuración');
-      }
-      
-    } catch (error) {
-      console.error('Error resetting email config:', error);
-      alert('Error reseteando configuración');
-    }
-  }
 
   // Init
   connect();
   loadMetrics();
   initPerformanceChart();
   loadMessagingStatus();
-  loadEmailConfig();
+  updateAccessDeniedKpi();
   
   // Actualizar gráfico cada 2 segundos
   setInterval(updatePerformanceChart, 2000);
+  // Actualizar KPI de accesos denegados cada 5 segundos
+  setInterval(updateAccessDeniedKpi, 5000);
   
   // Test simple para verificar que JavaScript funciona
   console.log('JavaScript is working!');
@@ -826,22 +810,243 @@
     const body = JSON.stringify({ sensorId, type, value, severity });
     const res = await fetch(`/api/sensors/${sensorId}/events`, { method: 'POST', headers: { 'Content-Type':'application/json' }, body, credentials: 'same-origin', redirect: 'manual' });
     if (res.status === 401 || res.status === 302) { return showLogin(addEvent); }
-    if (res.status === 403) { alert('No autorizado para enviar eventos'); return; }
+    if (res.status === 403) { 
+      const errorData = await res.json().catch(() => ({}));
+      showErrorMessage(errorData.message || 'No autorizado para enviar eventos'); 
+      return; 
+    }
     if (res.ok || res.status === 202) {
       document.getElementById('eventValue').value = '';
       // refrescar tabla de eventos
       setTimeout(loadEvents, 300);
     } else {
-      alert('Error enviando evento (HTTP '+res.status+')');
+      const errorData = await res.json().catch(() => ({}));
+      showErrorMessage(errorData.message || 'Error enviando evento (HTTP '+res.status+')');
     }
   }
   document.getElementById('btnAddEvent').addEventListener('click', addEvent);
+
+  // Función para agregar acceso
+  async function addAccess() {
+    const person = document.getElementById('accessPerson').value;
+    const location = document.getElementById('accessLocation').value;
+    const authorized = document.getElementById('accessAuthorized').value === 'true';
+    
+    if (!person || !location) { 
+      alert('Completa todos los campos'); 
+      return; 
+    }
+    
+    const body = JSON.stringify({ 
+      personId: person,
+      personName: person,
+      location, 
+      authorized 
+    });
+    
+    const res = await fetch('/api/access/logs', { 
+      method: 'POST', 
+      headers: { 'Content-Type':'application/json' }, 
+      body, 
+      credentials: 'same-origin', 
+      redirect: 'manual' 
+    });
+    
+    if (res.status === 401 || res.status === 302) { 
+      return showLogin(addAccess); 
+    }
+    if (res.status === 403) { 
+      const errorData = await res.json().catch(() => ({}));
+      showErrorMessage(errorData.message || 'No autorizado para crear accesos'); 
+      return; 
+    }
+    if (res.ok || res.status === 201) {
+      // Limpiar formulario
+      document.getElementById('accessPerson').value = '';
+      document.getElementById('accessLocation').value = '';
+      document.getElementById('accessAuthorized').value = 'true';
+      // Refrescar tabla de accesos
+      setTimeout(loadAccess, 300);
+    } else {
+      const errorData = await res.json().catch(() => ({}));
+      showErrorMessage(errorData.message || 'Error creando acceso (HTTP '+res.status+')');
+    }
+  }
+  document.getElementById('btnAddAccess').addEventListener('click', addAccess);
 
   // Login modal logic
   let pendingAction = null;
   function showLogin(next) {
     pendingAction = next;
     document.getElementById('loginOverlay').classList.add('show');
+  }
+
+  // Función para mostrar mensajes de error profesionales
+  function showErrorMessage(message, type = 'error') {
+    // Crear elemento de notificación
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: ${type === 'error' ? '#dc3545' : type === 'success' ? '#28a745' : '#17a2b8'};
+      color: white;
+      padding: 16px 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      z-index: 10000;
+      max-width: 400px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-size: 14px;
+      line-height: 1.4;
+      border-left: 4px solid ${type === 'error' ? '#c82333' : type === 'success' ? '#1e7e34' : '#138496'};
+    `;
+    
+    // Agregar icono según el tipo
+    const icon = type === 'error' ? '⚠️' : type === 'success' ? '✅' : 'ℹ️';
+    notification.innerHTML = `
+      <div style="display: flex; align-items: flex-start; gap: 12px;">
+        <span style="font-size: 18px; flex-shrink: 0;">${icon}</span>
+        <div style="flex: 1;">
+          <div style="font-weight: 600; margin-bottom: 4px;">
+            ${type === 'error' ? 'Error del Sistema' : type === 'success' ? 'Operación Exitosa' : 'Información'}
+          </div>
+          <div>${message}</div>
+        </div>
+        <button onclick="this.parentElement.parentElement.remove()" 
+                style="background: none; border: none; color: white; font-size: 18px; cursor: pointer; padding: 0; margin-left: 8px;">
+          ×
+        </button>
+      </div>
+    `;
+    
+    // Agregar al DOM
+    document.body.appendChild(notification);
+    
+    // Auto-remover después de 8 segundos
+    setTimeout(() => {
+      if (notification.parentElement) {
+        notification.style.opacity = '0';
+        notification.style.transform = 'translateX(100%)';
+        notification.style.transition = 'all 0.3s ease';
+        setTimeout(() => notification.remove(), 300);
+      }
+    }, 8000);
+  }
+
+  // Función para mostrar mensajes de éxito
+  function showSuccessMessage(message) {
+    showErrorMessage(message, 'success');
+  }
+
+  // Función para mostrar mensajes informativos
+  function showInfoMessage(message) {
+    showErrorMessage(message, 'info');
+  }
+
+  // Funciones para pruebas de carga
+  async function generateTestEvents() {
+    const count = parseInt(document.getElementById('testEventCount').value) || 100;
+    const btn = document.getElementById('btnGenerateEvents');
+    const results = document.getElementById('testResults');
+    
+    // Deshabilitar botón durante la prueba
+    btn.disabled = true;
+    btn.textContent = '⏳ Generando...';
+    results.innerHTML = '🚀 Iniciando generación de ' + count + ' eventos...\n⏳ Procesando...';
+    
+    try {
+      const startTime = Date.now();
+      const response = await fetch(`/api/test/generate-events?count=${count}`, {
+        method: 'POST',
+        credentials: 'same-origin',
+        redirect: 'manual'
+      });
+      
+      if (response.status === 401 || response.status === 302) {
+        return showLogin(() => generateTestEvents());
+      }
+      
+      if (response.status === 403) {
+        const errorData = await response.json().catch(() => ({}));
+        showErrorMessage(errorData.message || 'No autorizado para generar eventos de prueba');
+        return;
+      }
+      
+      const data = await response.json();
+      const endTime = Date.now();
+      const totalTime = endTime - startTime;
+      
+      if (data.success) {
+        results.innerHTML = `
+✅ <strong>Prueba completada exitosamente!</strong>
+📊 <strong>Estadísticas:</strong>
+   • Eventos solicitados: ${data.totalRequested}
+   • Eventos exitosos: ${data.successful}
+   • Errores: ${data.errors}
+   • Tiempo total: ${totalTime}ms
+   • Tiempo del servidor: ${data.durationMs}ms
+   • Eventos por segundo: ${data.eventsPerSecond}
+   • Eficiencia: ${((data.successful / data.totalRequested) * 100).toFixed(1)}%
+
+🎯 <strong>Análisis de rendimiento:</strong>
+   • ${data.successful >= data.totalRequested * 0.95 ? '✅ Excelente' : data.successful >= data.totalRequested * 0.8 ? '⚠️ Bueno' : '❌ Necesita optimización'} - Procesamiento de eventos
+   • ${parseFloat(data.eventsPerSecond) > 50 ? '✅ Excelente' : parseFloat(data.eventsPerSecond) > 20 ? '⚠️ Bueno' : '❌ Lento'} - Velocidad de procesamiento
+   • ${data.errors === 0 ? '✅ Perfecto' : data.errors <= data.totalRequested * 0.05 ? '⚠️ Aceptable' : '❌ Muchos errores'} - Tasa de errores
+        `;
+        
+        showSuccessMessage(`Prueba completada: ${data.successful}/${data.totalRequested} eventos procesados en ${data.eventsPerSecond} eventos/segundo`);
+        
+        // Refrescar datos después de la prueba
+        setTimeout(() => {
+          loadEvents();
+          updatePerformanceChart();
+        }, 1000);
+        
+      } else {
+        results.innerHTML = `❌ <strong>Error en la prueba:</strong>\n${data.message}`;
+        showErrorMessage('Error en la prueba de carga: ' + data.message);
+      }
+      
+    } catch (error) {
+      console.error('Error en prueba de carga:', error);
+      results.innerHTML = `❌ <strong>Error de conexión:</strong>\n${error.message}`;
+      showErrorMessage('Error de conexión durante la prueba: ' + error.message);
+    } finally {
+      // Rehabilitar botón
+      btn.disabled = false;
+      btn.textContent = '🚀 Generar Eventos';
+    }
+  }
+
+  async function checkSensorCount() {
+    const results = document.getElementById('testResults');
+    results.innerHTML = '📊 Consultando sensores disponibles...';
+    
+    try {
+      const response = await fetch('/api/test/sensors/count', {
+        credentials: 'same-origin',
+        redirect: 'manual'
+      });
+      
+      if (response.status === 401 || response.status === 302) {
+        return showLogin(() => checkSensorCount());
+      }
+      
+      if (response.status === 403) {
+        const errorData = await response.json().catch(() => ({}));
+        showErrorMessage(errorData.message || 'No autorizado para consultar sensores');
+        return;
+      }
+      
+      const data = await response.json();
+      results.innerHTML = `📊 <strong>Información del sistema:</strong>\n${data.message}\n\n💡 <strong>Nota:</strong> Se necesitan sensores para generar eventos de prueba.`;
+      
+    } catch (error) {
+      console.error('Error consultando sensores:', error);
+      results.innerHTML = `❌ <strong>Error consultando sensores:</strong>\n${error.message}`;
+    }
   }
   async function doLogin(ev) {
     ev.preventDefault();
@@ -908,6 +1113,12 @@
   </form>
 </div>
  </main>
+ <footer>
+   <div class="footer-left">© Stark Security</div>
+   <div class="footer-right">
+     <a href="/swagger-ui/index.html" target="_blank">Swagger</a>
+   </div>
+ </footer>
  </body>
  </html>
 

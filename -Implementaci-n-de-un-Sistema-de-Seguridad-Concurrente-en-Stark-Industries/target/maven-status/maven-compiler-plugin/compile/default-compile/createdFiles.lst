@@ -9,6 +9,7 @@ com\stark\security\SecurityConfig.class
 com\stark\sensors\domain\SensorEvent.class
 com\stark\common\config\AsyncConfig.class
 com\stark\sensors\repo\SensorRepository.class
+com\stark\security\LoginSuccessHandler.class
 com\stark\sensors\repo\SensorEventRepository.class
 com\stark\sensors\domain\Sensor.class
 com\stark\sensors\domain\SensorEvent$Severity.class
@@ -17,6 +18,7 @@ com\stark\sensors\web\SensorBeanController.class
 com\stark\common\web\GlobalExceptionHandler.class
 com\stark\sensors\domain\SensorType.class
 com\stark\StarkSecurityApplication.class
+com\stark\common\service\ErrorMessageService.class
 com\stark\access\repo\AccessLogRepository.class
 com\stark\alerts\web\MessagingController.class
 com\stark\alerts\service\EmailConfigurationService.class
@@ -25,6 +27,7 @@ com\stark\sensors\web\SensorController.class
 com\stark\monitoring\health\SystemHealthIndicator.class
 com\stark\common\web\LoginController.class
 com\stark\sensors\web\EventQueryController.class
+com\stark\sensors\web\TestController.class
 com\stark\access\web\AccessController.class
 com\stark\sensors\service\AccessSensorService.class
 com\stark\sensors\service\SensorIngestionService.class

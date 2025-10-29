@@ -19,7 +19,7 @@ public class EventQueryController {
     public EventQueryController(SensorEventRepository repo) { this.repo = repo; }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN','SECURITY_ENGINEER','OPERATOR','VIEWER')")
+    @PreAuthorize("hasAnyRole('ADMIN','SECURITY_ENGINEER','OPERATOR')")
     public Page<SensorEvent> search(@RequestParam(required = false) SensorType type,
                                     @RequestParam(required = false) Severity severity,
                                     @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant from,

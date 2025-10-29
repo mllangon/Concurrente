@@ -108,3 +108,4 @@ public class EmailConfigurationService {
         return EMAIL_PATTERN.matcher(email.trim()).matches();
     }
 }
+

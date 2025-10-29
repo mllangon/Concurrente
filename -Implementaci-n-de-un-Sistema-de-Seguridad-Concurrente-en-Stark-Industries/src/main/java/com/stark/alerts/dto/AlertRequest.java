@@ -23,7 +23,6 @@ public class AlertRequest {
         this.message = message;
     }
 
-    // Getters y Setters
     public String getSensorName() { return sensorName; }
     public void setSensorName(String sensorName) { this.sensorName = sensorName; }
 
@@ -39,6 +38,3 @@ public class AlertRequest {
     public List<String> getEmailRecipients() { return emailRecipients; }
     public void setEmailRecipients(List<String> emailRecipients) { this.emailRecipients = emailRecipients; }
 }
-
-
-

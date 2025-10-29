@@ -1,10 +1,12 @@
 C:\Users\llans\OneDrive\Documentos\GitHub\Concurrente\-Implementaci-n-de-un-Sistema-de-Seguridad-Concurrente-en-Stark-Industries\src\main\java\com\stark\security\SecurityConfig.java
 C:\Users\llans\OneDrive\Documentos\GitHub\Concurrente\-Implementaci-n-de-un-Sistema-de-Seguridad-Concurrente-en-Stark-Industries\src\main\java\com\stark\alerts\service\AlertService.java
+C:\Users\llans\OneDrive\Documentos\GitHub\Concurrente\-Implementaci-n-de-un-Sistema-de-Seguridad-Concurrente-en-Stark-Industries\src\main\java\com\stark\common\service\ErrorMessageService.java
 C:\Users\llans\OneDrive\Documentos\GitHub\Concurrente\-Implementaci-n-de-un-Sistema-de-Seguridad-Concurrente-en-Stark-Industries\src\main\java\com\stark\alerts\dto\AlertRequest.java
 C:\Users\llans\OneDrive\Documentos\GitHub\Concurrente\-Implementaci-n-de-un-Sistema-de-Seguridad-Concurrente-en-Stark-Industries\src\main\java\com\stark\sensors\web\SensorBeanController.java
 C:\Users\llans\OneDrive\Documentos\GitHub\Concurrente\-Implementaci-n-de-un-Sistema-de-Seguridad-Concurrente-en-Stark-Industries\src\main\java\com\stark\access\web\AccessController.java
 C:\Users\llans\OneDrive\Documentos\GitHub\Concurrente\-Implementaci-n-de-un-Sistema-de-Seguridad-Concurrente-en-Stark-Industries\src\main\java\com\stark\common\web\LoginController.java
 C:\Users\llans\OneDrive\Documentos\GitHub\Concurrente\-Implementaci-n-de-un-Sistema-de-Seguridad-Concurrente-en-Stark-Industries\src\main\java\com\stark\common\web\GlobalExceptionHandler.java
+C:\Users\llans\OneDrive\Documentos\GitHub\Concurrente\-Implementaci-n-de-un-Sistema-de-Seguridad-Concurrente-en-Stark-Industries\src\main\java\com\stark\security\LoginSuccessHandler.java
 C:\Users\llans\OneDrive\Documentos\GitHub\Concurrente\-Implementaci-n-de-un-Sistema-de-Seguridad-Concurrente-en-Stark-Industries\src\main\java\com\stark\sensors\web\SensorMetricsController.java
 C:\Users\llans\OneDrive\Documentos\GitHub\Concurrente\-Implementaci-n-de-un-Sistema-de-Seguridad-Concurrente-en-Stark-Industries\src\main\java\com\stark\sensors\web\EventQueryController.java
 C:\Users\llans\OneDrive\Documentos\GitHub\Concurrente\-Implementaci-n-de-un-Sistema-de-Seguridad-Concurrente-en-Stark-Industries\src\main\java\com\stark\alerts\service\MessagingService.java
@@ -19,6 +21,7 @@ C:\Users\llans\OneDrive\Documentos\GitHub\Concurrente\-Implementaci-n-de-un-Sist
 C:\Users\llans\OneDrive\Documentos\GitHub\Concurrente\-Implementaci-n-de-un-Sistema-de-Seguridad-Concurrente-en-Stark-Industries\src\main\java\com\stark\alerts\service\EmailConfigurationService.java
 C:\Users\llans\OneDrive\Documentos\GitHub\Concurrente\-Implementaci-n-de-un-Sistema-de-Seguridad-Concurrente-en-Stark-Industries\src\main\java\com\stark\monitoring\health\SystemHealthIndicator.java
 C:\Users\llans\OneDrive\Documentos\GitHub\Concurrente\-Implementaci-n-de-un-Sistema-de-Seguridad-Concurrente-en-Stark-Industries\src\main\java\com\stark\sensors\repo\SensorRepository.java
+C:\Users\llans\OneDrive\Documentos\GitHub\Concurrente\-Implementaci-n-de-un-Sistema-de-Seguridad-Concurrente-en-Stark-Industries\src\main\java\com\stark\sensors\web\TestController.java
 C:\Users\llans\OneDrive\Documentos\GitHub\Concurrente\-Implementaci-n-de-un-Sistema-de-Seguridad-Concurrente-en-Stark-Industries\src\main\java\com\stark\alerts\dto\AlertMessage.java
 C:\Users\llans\OneDrive\Documentos\GitHub\Concurrente\-Implementaci-n-de-un-Sistema-de-Seguridad-Concurrente-en-Stark-Industries\src\main\java\com\stark\monitoring\web\MetricsPublicController.java
 C:\Users\llans\OneDrive\Documentos\GitHub\Concurrente\-Implementaci-n-de-un-Sistema-de-Seguridad-Concurrente-en-Stark-Industries\src\main\java\com\stark\sensors\service\TemperatureSensorService.java

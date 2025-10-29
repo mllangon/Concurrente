@@ -15,10 +15,17 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
 @Configuration
 @EnableMethodSecurity
 public class SecurityConfig {
+
+    private final AuthenticationSuccessHandler loginSuccessHandler;
+
+    public SecurityConfig(AuthenticationSuccessHandler loginSuccessHandler) {
+        this.loginSuccessHandler = loginSuccessHandler;
+    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -48,7 +55,7 @@ public class SecurityConfig {
                 .formLogin(form -> form
                         .loginPage("/login.html")
                         .loginProcessingUrl("/login")
-                        .defaultSuccessUrl("/", true)
+                        .successHandler(loginSuccessHandler)
                         .failureUrl("/login.html?error=true")
                         .permitAll())
                 .logout(logout -> logout
@@ -67,8 +74,7 @@ public class SecurityConfig {
         UserDetails admin = User.withUsername("admin").password(encoder.encode("admin")).roles("ADMIN").build();
         UserDetails sec = User.withUsername("sec").password(encoder.encode("sec")).roles("SECURITY_ENGINEER").build();
         UserDetails op = User.withUsername("op").password(encoder.encode("op")).roles("OPERATOR").build();
-        UserDetails view = User.withUsername("view").password(encoder.encode("view")).roles("VIEWER").build();
-        return new InMemoryUserDetailsManager(admin, sec, op, view);
+        return new InMemoryUserDetailsManager(admin, sec, op);
     }
 
     @Bean

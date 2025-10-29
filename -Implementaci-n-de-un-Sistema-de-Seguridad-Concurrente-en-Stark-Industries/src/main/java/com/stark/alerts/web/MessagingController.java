@@ -25,30 +25,21 @@ public class MessagingController {
     private final MessagingCoordinatorService messagingCoordinator;
     
     public MessagingController(AlertService alertService,
-                              MessagingCoordinatorService messagingCoordinator) {
+                               MessagingCoordinatorService messagingCoordinator) {
         this.alertService = alertService;
         this.messagingCoordinator = messagingCoordinator;
     }
     
-    /**
-     * Obtiene el estado de todos los servicios de mensajería
-     */
     @GetMapping("/status")
     public ResponseEntity<Map<String, Boolean>> getServicesStatus() {
         return ResponseEntity.ok(alertService.getMessagingServicesStatus());
     }
     
-    /**
-     * Obtiene información detallada de los servicios
-     */
     @GetMapping("/info")
     public ResponseEntity<Map<String, Object>> getServicesInfo() {
         return ResponseEntity.ok(alertService.getMessagingServicesInfo());
     }
     
-    /**
-     * Envía una alerta de prueba a todos los servicios
-     */
     @PostMapping("/test")
     public ResponseEntity<Map<String, Object>> sendTestAlert(@RequestParam(defaultValue = "CRITICAL") String severity) {
         AlertMessage testMessage = new AlertMessage(
@@ -69,9 +60,6 @@ public class MessagingController {
         ));
     }
     
-    /**
-     * Envía una alerta a servicios específicos
-     */
     @PostMapping("/send")
     public ResponseEntity<Map<String, Object>> sendAlertToServices(
             @RequestParam String severity,
@@ -101,14 +89,9 @@ public class MessagingController {
         ));
     }
     
-    
-    /**
-     * Envía una alerta con destinatarios personalizados
-     */
     @PostMapping("/send-custom")
     public ResponseEntity<Map<String, Object>> sendCustomAlert(@RequestBody AlertRequest request) {
         try {
-            // Enviar por WebSocket (tiempo real)
             AlertMessage message = new AlertMessage(
                     UUID.randomUUID(),
                     request.getSensorName(),
@@ -120,7 +103,6 @@ public class MessagingController {
             
             alertService.publish(message);
             
-            // Enviar a destinatarios personalizados
             Map<String, Boolean> results = messagingCoordinator.sendCustomAlert(request).get();
             
             return ResponseEntity.ok(Map.of(

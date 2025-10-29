@@ -84,8 +84,9 @@ mvn compile
 mvn clean package -DskipTests
 ```
 
-#### **Paso 3: Configurar Email (Opcional pero Recomendado)**
+#### **Paso 3: Configurar Email (desde código/configuración)**
 ```bash
+# Opción A: Variables de entorno (recomendado en desarrollo/producción)
 # Windows (PowerShell)
 $env:MAIL_USERNAME="tu-email@gmail.com"
 $env:MAIL_PASSWORD="tu-app-password"
@@ -103,6 +104,21 @@ export MAIL_USERNAME="tu-email@gmail.com"
 export MAIL_PASSWORD="tu-app-password"
 export MAIL_FROM="tu-email@gmail.com"
 export MAIL_TO="tu-email@gmail.com"
+
+# Opción B: application.yml (código)
+# Edita src/main/resources/application.yml y ajusta:
+# spring:
+#   mail:
+#     host: smtp.gmail.com
+#     port: 587
+#     username: ${MAIL_USERNAME:tu-email@gmail.com}
+#     password: ${MAIL_PASSWORD:tu-app-password}
+# app:
+#   mail:
+#     from: ${MAIL_FROM:tu-email@gmail.com}
+#     to: ${MAIL_TO:tu-email@gmail.com}
+
+# Cambia los valores por los tuyos o define las variables de entorno.
 ```
 
 #### **Paso 4: Ejecutar la Aplicación**
@@ -138,9 +154,8 @@ java -jar target/*.jar
 | Usuario | Contraseña | Rol | Permisos |
 |---------|------------|-----|----------|
 | `admin` | `admin` | ADMIN | Acceso completo al sistema |
-| `sec` | `sec` | SECURITY_ENGINEER | Gestión de sensores y eventos |
-| `op` | `op` | OPERATOR | Operaciones y monitoreo |
-| `view` | `view` | VIEWER | Solo consulta (lectura) |
+| `sec` | `sec` | SECURITY_ENGINEER | Crear sensores y eventos (sin ver accesos) |
+| `op` | `op` | OPERATOR | Crear y ver logs de acceso, ver sensores y eventos |
 
 ---
 
@@ -324,6 +339,15 @@ killall java                                     # Linux/macOS
 ---
 
 ## 🧪 Cómo Probar el Sistema
+### ✉️ Cambiar el correo de envío/recepción
+
+Esta versión no expone un panel para cambiar el email desde el dashboard. Para modificarlo:
+
+- Método 1 (recomendado): define variables de entorno `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_FROM`, `MAIL_TO` antes de iniciar la app.
+- Método 2 (rápido para pruebas): edita `src/main/resources/application.yml` y cambia los valores por defecto bajo `app.mail.from` y `app.mail.to`.
+
+Tras el cambio, reinicia la aplicación.
+
 
 ### **1. Probar Autenticación**
 1. Ir a `http://localhost:8080/`
