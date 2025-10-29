@@ -2,22 +2,24 @@
 
 ## 1) Requisitos para iniciar la aplicación e instalación
 
-### Prerrequisitos
+### Requisitos Previos
 
 #### **Configuración de Email (Para Alertas)**
-Para que las alertas por email funcionen, necesitas configurar un servidor SMTP:
+Para habilitar las alertas por correo electrónico, es necesario configurar un servidor SMTP. A continuación, se presentan las opciones:
 
-**Opción A: Gmail (Recomendado)**
-1. Ve a [Google Account Security](https://myaccount.google.com/security)
-2. Activa la verificación en 2 pasos
-3. Genera una contraseña de aplicación para "Stark Security"
-4. Configura las variables de entorno (ver sección de configuración)
+**Opción A: Gmail (Recomendado)
+Accede a la Seguridad de la Cuenta de Google.
+Activa la verificación en dos pasos.
+Genera una contraseña de aplicación específica para "Stark Security".
+Configura las variables de entorno (consulta la sección de configuración para más detalles).
 
-**Opción B: Outlook/Hotmail**
-- Usa tu cuenta de Outlook con tu contraseña normal
+**Opción B: Outlook/Hotmail
+- Utiliza tu cuenta de Outlook con tu contraseña habitual.
 
-**Opción C: Yahoo**
-- Requiere contraseña de aplicación (similar a Gmail)
+
+**Opción C: Yahoo
+- Requiere una contraseña de aplicación, de manera similar a Gmail.
+
 
 **Ver `EMAIL_CONFIG.md` para instrucciones detalladas**
 
