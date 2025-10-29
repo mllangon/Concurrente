@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Stark Security - Login</title>
+  <link href="https://cdn.jsdelivr.net/npm/modern-normalize/modern-normalize.css" rel="stylesheet" />
+  <style>
+    :root { --bg:#0b1020; --card:#111931; --muted:#a8b3cf; --text:#e6edf7; --accent:#13b3ff; --warn:#ffbf47; --crit:#ff5c5c; }
+    * { box-sizing: border-box; }
+    body { 
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial; 
+      margin: 0; 
+      background: var(--bg); 
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+    .login-container {
+      width: 100%;
+      max-width: 400px;
+      padding: 20px;
+    }
+    .card { 
+      background: var(--card); 
+      border: 1px solid #1e2a4a; 
+      border-radius: 12px; 
+      padding: 32px; 
+      box-shadow: 0 6px 18px rgba(0,0,0,.25);
+      text-align: center;
+    }
+    .logo {
+      font-size: 28px;
+      font-weight: bold;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+    .subtitle {
+      color: var(--muted);
+      margin-bottom: 32px;
+    }
+    .form-group {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+    input {
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: 1px solid #233056;
+      background: #0f1a36;
+      color: var(--text);
+      font-size: 16px;
+    }
+    input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(19, 179, 255, 0.2);
+    }
+    button {
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: none;
+      background: var(--accent);
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background: #0ea5e9;
+    }
+    .error {
+      color: var(--crit);
+      margin-top: 12px;
+      display: none;
+    }
+    .demo-users {
+      margin-top: 24px;
+      padding: 16px;
+      background: #0e1530;
+      border-radius: 8px;
+      border: 1px solid #1e2a4a;
+    }
+    .demo-users h4 {
+      margin: 0 0 12px 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .user-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      font-size: 12px;
+    }
+    .user-item {
+      padding: 8px;
+      background: #0a1220;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .user-item:hover {
+      background: #1a2332;
+    }
+    .user-role {
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .user-cred {
+      color: var(--muted);
+      font-size: 11px;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="card">
+      <div class="logo">Stark Security</div>
+      <div class="subtitle">Sistema de Seguridad Concurrente</div>
+      
+      <form method="post" action="/login" id="loginForm">
+        <div class="form-group">
+          <label for="username">Usuario</label>
+          <input type="text" id="username" name="username" required autocomplete="username" />
+        </div>
+        
+        <div class="form-group">
+          <label for="password">Contraseña</label>
+          <input type="password" id="password" name="password" required autocomplete="current-password" />
+        </div>
+        
+        <button type="submit">Iniciar Sesión</button>
+        <div class="error" id="error">Credenciales inválidas</div>
+      </form>
+      
+      <div class="demo-users">
+        <h4>Usuarios de Prueba</h4>
+        <div class="user-list">
+          <div class="user-item" onclick="fillCredentials('admin', 'admin')">
+            <div class="user-role">ADMIN</div>
+            <div class="user-cred">admin / admin</div>
+          </div>
+          <div class="user-item" onclick="fillCredentials('sec', 'sec')">
+            <div class="user-role">SECURITY</div>
+            <div class="user-cred">sec / sec</div>
+          </div>
+          <div class="user-item" onclick="fillCredentials('op', 'op')">
+            <div class="user-role">OPERATOR</div>
+            <div class="user-cred">op / op</div>
+          </div>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function fillCredentials(username, password) {
+      document.getElementById('username').value = username;
+      document.getElementById('password').value = password;
+    }
+    
+    // Mostrar error si viene en la URL
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('error')) {
+      document.getElementById('error').style.display = 'block';
+    }
+    
+    // Auto-focus en el primer campo
+    document.getElementById('username').focus();
+  </script>
+</body>
+</html>
