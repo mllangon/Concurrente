@@ -2,24 +2,22 @@
 
 ## 1) Requisitos para iniciar la aplicación e instalación
 
-### Requisitos Previos
+### Prerrequisitos
 
 #### **Configuración de Email (Para Alertas)**
-Para habilitar las alertas por correo electrónico, es necesario configurar un servidor SMTP. A continuación, se presentan las opciones:
+Para que las alertas por email funcionen, necesitas configurar un servidor SMTP:
 
-** Opción A: Gmail (Recomendado)
-1, Accede a la Seguridad de la Cuenta de Google.
-2. Activa la verificación en dos pasos.
-3. Genera una contraseña de aplicación específica para "Stark Security".
-4. Configura las variables de entorno (consulta la sección de configuración para más detalles).
+**Opción A: Gmail (Recomendado)**
+1. Ve a [Google Account Security](https://myaccount.google.com/security)
+2. Activa la verificación en 2 pasos
+3. Genera una contraseña de aplicación para "Stark Security"
+4. Configura las variables de entorno (ver sección de configuración)
 
-** Opción B: Outlook/Hotmail
-- Utiliza tu cuenta de Outlook con tu contraseña habitual.
+**Opción B: Outlook/Hotmail**
+- Usa tu cuenta de Outlook con tu contraseña normal
 
-
-** Opción C: Yahoo
-- Requiere una contraseña de aplicación, de manera similar a Gmail.
-
+**Opción C: Yahoo**
+- Requiere contraseña de aplicación (similar a Gmail)
 
 **Ver `EMAIL_CONFIG.md` para instrucciones detalladas**
 
@@ -317,6 +315,16 @@ Sergio Martín Rosales, Miguel De Dios Fernández y Mario Llansó González-Anle
 - [Java 21 Documentation](https://docs.oracle.com/en/java/javase/21/)
 
 ---
+
+## Soporte
+
+Para problemas o preguntas sobre el sistema:
+1. Revisar la sección de "Solución de Problemas"
+2. Verificar logs de la aplicación
+3. Consultar la documentación de Spring Boot
+4. Contactar al equipo de desarrollo
+
+**¡El sistema está listo para usar!**
 
 
 
