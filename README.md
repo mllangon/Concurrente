@@ -96,7 +96,7 @@ mvn spring-boot:run
 
 ---
 
-## 4) Organización de la práctica 
+## 4) Organización de la práctica (qué se hizo y para qué)
 
 - Autenticación y autorización (Spring Security)
   - `SecurityFilterChain` protege rutas, login en `/login.html`, logout y manejo de 401/403
@@ -121,7 +121,7 @@ mvn spring-boot:run
   - Botones unificados (`tab-btn` + variantes)
   - Footer limpio y panel Swagger compacto al final del Dashboard
 
-## 5) Resumen de roles
+## 5) Resumen de roles: por qué y qué puede cada uno
 
 - ADMIN
   - Por qué: rol de gobierno del sistema y auditoría
@@ -313,8 +313,3 @@ Sergio Martín Rosales, Miguel De Dios Fernández y Mario Llansó González-Anle
 - [Spring Security Documentation](https://spring.io/projects/spring-security)
 - [Spring Framework Documentation](https://spring.io/projects/spring-framework)
 - [Java 21 Documentation](https://docs.oracle.com/en/java/javase/21/)
-
-
-
-
-
