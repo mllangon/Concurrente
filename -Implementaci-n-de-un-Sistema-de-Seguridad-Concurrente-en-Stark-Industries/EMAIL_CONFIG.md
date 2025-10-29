@@ -1,9 +1,9 @@
-# 📧 Configuración de Email para Stark Security
+# Configuración de Email para Stark Security
 
-## 🚨 **PROBLEMA ACTUAL**
+## **PROBLEMA ACTUAL**
 El sistema no puede enviar emails porque está configurado para usar un servidor SMTP local que no existe.
 
-## ✅ **SOLUCIÓN: Configurar Gmail**
+## **SOLUCIÓN: Configurar Gmail**
 
 ### **Paso 1: Obtener Contraseña de Aplicación de Gmail**
 
@@ -54,7 +54,7 @@ export MAIL_TO="tu-email@gmail.com"
 mvn spring-boot:run
 ```
 
-## 🔧 **Configuración Alternativa: Outlook/Hotmail**
+## **Configuración Alternativa: Outlook/Hotmail**
 
 Si prefieres usar Outlook:
 
@@ -68,7 +68,7 @@ spring:
     password: ${MAIL_PASSWORD:tu-contraseña}
 ```
 
-## 🔧 **Configuración Alternativa: Yahoo**
+## **Configuración Alternativa: Yahoo**
 
 Si prefieres usar Yahoo:
 
@@ -82,7 +82,7 @@ spring:
     password: ${MAIL_PASSWORD:tu-app-password}
 ```
 
-## 🧪 **Probar el Envío**
+## **Probar el Envío**
 
 1. **Inicia la aplicación** con las variables de entorno
 2. **Ve a** `http://localhost:8080/`
@@ -92,10 +92,10 @@ spring:
 6. **Haz clic en "Enviar Alerta Personalizada"**
 7. **Revisa tu bandeja de entrada**
 
-## 📱 **Ejemplo de Email que Recibirás**
+## **Ejemplo de Email que Recibirás**
 
 ```html
-🚨 Alerta de Seguridad
+Alerta de Seguridad
 Severidad: CRITICAL
 Sensor: Sensor de Temperatura Crítica
 Tipo: TEMPERATURE
@@ -103,7 +103,7 @@ Timestamp: 26/10/2025 16:13:00
 Mensaje: Temperatura excede límites seguros
 ```
 
-## ⚠️ **Notas Importantes**
+## **Notas Importantes**
 
 - **NO uses tu contraseña normal de Gmail**
 - **Usa SIEMPRE la contraseña de aplicación**
@@ -111,7 +111,7 @@ Mensaje: Temperatura excede límites seguros
 - **Gmail requiere verificación en 2 pasos activada**
 - **Los emails pueden tardar unos segundos en llegar**
 
-## 🆘 **Solución de Problemas**
+## **Solución de Problemas**
 
 ### **Error: "Authentication failed"**
 - Verifica que la contraseña de aplicación sea correcta
