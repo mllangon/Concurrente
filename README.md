@@ -34,7 +34,7 @@ Para que las alertas por email funcionen, necesitas configurar un servidor SMTP:
 
 #### **Paso 1: Navegar al Directorio del Proyecto**
 ```bash
-cd "Implementación-de-un-Sistema-de-Seguridad-Concurrente-en-Stark-Industries"
+cd ..."sistemas"
 ```
 
 #### **Paso 2: Compilar el Proyecto**
