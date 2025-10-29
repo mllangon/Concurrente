@@ -314,17 +314,7 @@ Sergio Martín Rosales, Miguel De Dios Fernández y Mario Llansó González-Anle
 - [Spring Framework Documentation](https://spring.io/projects/spring-framework)
 - [Java 21 Documentation](https://docs.oracle.com/en/java/javase/21/)
 
----
 
-## Soporte
-
-Para problemas o preguntas sobre el sistema:
-1. Revisar la sección de "Solución de Problemas"
-2. Verificar logs de la aplicación
-3. Consultar la documentación de Spring Boot
-4. Contactar al equipo de desarrollo
-
-**¡El sistema está listo para usar!**
 
 
 
