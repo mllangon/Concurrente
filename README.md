@@ -291,7 +291,11 @@ killall java                                     # Linux/macOS
 
 ---
 
-## 6) Hecho por
+## 6) Diagrama de arquitectura del sistema
+<img width="772" height="691" alt="DiagramaArquitecturaConcurrente drawio 1" src="https://github.com/user-attachments/assets/08c329e3-5ef5-4204-9f54-a4e5e4c80e14" />
+
+
+## 7) Hecho por
 
 Sergio Martín Rosales, Miguel De Dios Fernández y Mario Llansó González-Anleo
 
