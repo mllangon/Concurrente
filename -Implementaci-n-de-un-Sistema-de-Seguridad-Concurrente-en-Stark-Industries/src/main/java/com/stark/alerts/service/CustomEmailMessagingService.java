@@ -20,14 +20,14 @@ import java.util.List;
 public class CustomEmailMessagingService {
     
     private final JavaMailSender mailSender;
-    private final String emailFrom;
+    private final EmailConfigurationService emailConfigService;
     private final boolean htmlEnabled;
     
     public CustomEmailMessagingService(JavaMailSender mailSender,
-                                      @Value("${app.alerts.email-from:noreply@stark.com}") String emailFrom,
-                                      @Value("${app.alerts.email.html-enabled:true}") boolean htmlEnabled) {
+                                       EmailConfigurationService emailConfigService,
+                                       @Value("${app.alerts.email.html-enabled:true}") boolean htmlEnabled) {
         this.mailSender = mailSender;
-        this.emailFrom = emailFrom;
+        this.emailConfigService = emailConfigService;
         this.htmlEnabled = htmlEnabled;
     }
     
@@ -40,10 +40,12 @@ public class CustomEmailMessagingService {
         }
         
         try {
+            String emailFrom = emailConfigService.getEmailFrom();
+            
             if (htmlEnabled) {
-                return sendHtmlEmailToRecipients(message, recipients);
+                return sendHtmlEmailToRecipients(message, recipients, emailFrom);
             } else {
-                return sendPlainTextEmailToRecipients(message, recipients);
+                return sendPlainTextEmailToRecipients(message, recipients, emailFrom);
             }
         } catch (Exception e) {
             System.err.println("Error sending email alert to custom recipients: " + e.getMessage());
@@ -51,7 +53,7 @@ public class CustomEmailMessagingService {
         }
     }
     
-    private boolean sendHtmlEmailToRecipients(AlertMessage message, List<String> recipients) throws MessagingException {
+    private boolean sendHtmlEmailToRecipients(AlertMessage message, List<String> recipients, String emailFrom) throws MessagingException {
         MimeMessage mimeMessage = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
         
@@ -64,7 +66,7 @@ public class CustomEmailMessagingService {
         return true;
     }
     
-    private boolean sendPlainTextEmailToRecipients(AlertMessage message, List<String> recipients) {
+    private boolean sendPlainTextEmailToRecipients(AlertMessage message, List<String> recipients, String emailFrom) {
         SimpleMailMessage mail = new SimpleMailMessage();
         mail.setTo(recipients.toArray(new String[0]));
         mail.setFrom(emailFrom);
@@ -109,7 +111,9 @@ public class CustomEmailMessagingService {
                         <div class="severity">%s</div>
                     </div>
                     <div class="content">
-                        <div class="sensor"><strong>Sensor:</strong> %s</div>
+                        <div class="message">
+                            <strong>Hay un evento de la gravedad "%s" que proviene del sensor "%s"</strong>
+                        </div>
                         <div class="sensor"><strong>Tipo:</strong> %s</div>
                         <div class="sensor"><strong>Timestamp:</strong> %s</div>
                         <div class="message">
@@ -127,6 +131,7 @@ public class CustomEmailMessagingService {
             """, 
             severityColor, severityColor,
             message.getSeverity(),
+            message.getSeverity(),
             message.getSensorName(),
             message.getType(),
             message.getTimestamp().atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")),
@@ -138,8 +143,8 @@ public class CustomEmailMessagingService {
         return String.format("""
             ALERTA DE SEGURIDAD - STARK INDUSTRIES
             
-            Severidad: %s
-            Sensor: %s
+            Hay un evento de la gravedad "%s" que proviene del sensor "%s"
+            
             Tipo: %s
             Timestamp: %s
             
@@ -166,3 +171,6 @@ public class CustomEmailMessagingService {
         };
     }
 }
+
+
+

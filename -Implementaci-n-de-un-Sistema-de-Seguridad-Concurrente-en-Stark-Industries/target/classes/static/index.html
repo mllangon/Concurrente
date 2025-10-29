@@ -9,14 +9,31 @@
     :root { --bg:#0b1020; --card:#111931; --muted:#a8b3cf; --text:#e6edf7; --accent:#13b3ff; --warn:#ffbf47; --crit:#ff5c5c; }
     * { box-sizing: border-box; }
     body { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial; margin: 0; background: var(--bg); color: var(--text); }
-    header { padding: 20px 28px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #1d2542; background: #0e1530; position: sticky; top: 0; z-index: 2; }
+    /* Background layer (non-intrusive, behind all content) */
+    .bg { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+    .bg-gradient { position: absolute; inset: -20%; background: radial-gradient(60% 60% at 10% 10%, rgba(19,179,255,.15) 0%, transparent 60%),
+                                             radial-gradient(60% 60% at 90% 20%, rgba(255,92,92,.12) 0%, transparent 60%),
+                                             radial-gradient(70% 70% at 50% 90%, rgba(255,191,71,.10) 0%, transparent 60%);
+                      filter: blur(40px); transform: scale(1.1); animation: floatBg 18s ease-in-out infinite alternate; }
+    .bg-blur { position: absolute; inset: 0; backdrop-filter: blur(6px) saturate(120%); background: linear-gradient(180deg, rgba(11,16,32,.35) 0%, rgba(11,16,32,.6) 100%); }
+    @keyframes floatBg { from { transform: scale(1.05) translateY(-10px); } to { transform: scale(1.12) translateY(10px); } }
+    /* Code typing/scrolling effect */
+    .code-rain { position: absolute; inset: 0; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; color: rgba(166, 190, 231, .14); 
+                 line-height: 1.8; white-space: nowrap; display: flex; flex-direction: column; gap: 6px; padding: 60px 24px; mask-image: linear-gradient(180deg, transparent 0%, #000 10%, #000 90%, transparent 100%); }
+    .code-rain span { display: inline-block; will-change: transform; filter: blur(.3px); }
+    /* staggered columns that move like code being written/streamed */
+    .code-rain span:nth-child(3n+1) { animation: scrollLine 18s linear infinite; }
+    .code-rain span:nth-child(3n+2) { animation: scrollLine 22s linear infinite reverse; opacity: .85; }
+    .code-rain span:nth-child(3n)   { animation: scrollLine 26s linear infinite; opacity: .7; }
+    @keyframes scrollLine { 0% { transform: translateY(40px); } 100% { transform: translateY(-40px); } }
+    header { padding: 20px 28px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #1d2542; background: rgba(14, 21, 48, .85); backdrop-filter: blur(6px) saturate(120%); position: sticky; top: 0; z-index: 2; }
     header h1 { margin: 0; font-size: 22px; letter-spacing: .2px; }
     main { padding: 24px; max-width: 1200px; margin: 0 auto; }
     nav { display: flex; gap: 8px; }
     .tab-btn { background: #0f1a36; color: var(--text); border: 1px solid #233056; padding: 8px 12px; border-radius: 8px; cursor: pointer; }
     .tab-btn:hover { border-color: var(--accent); }
     a { color: var(--accent); text-decoration: none; }
-    .card { background: var(--card); border: 1px solid #1e2a4a; border-radius: 12px; padding: 16px; box-shadow: 0 6px 18px rgba(0,0,0,.25); }
+    .card { background: rgba(17, 25, 49, .85); backdrop-filter: blur(8px) saturate(120%); border: 1px solid #1e2a4a; border-radius: 12px; padding: 16px; box-shadow: 0 6px 18px rgba(0,0,0,.25); }
     .grid { display: grid; gap: 16px; }
     .grid-2 { grid-template-columns: 2fr 1fr; }
     table { width: 100%; border-collapse: collapse; }
@@ -28,11 +45,13 @@
     .WARN { background: rgba(255,191,71,.15); border-color: #ffd389; color: #ffe1a8; }
     .INFO { background: rgba(19,179,255,.15); border-color: #74d7ff; color: #b9ecff; }
     #status { margin-bottom: 10px; color: var(--muted); }
-    .metrics pre { background: #0d152e; border: 1px solid #24325a; border-radius: 8px; padding: 12px; color: #cbd6f6; max-height: 260px; overflow: auto; }
+    .metrics pre { background: rgba(13,21,46,.8); backdrop-filter: blur(6px); border: 1px solid #24325a; border-radius: 8px; padding: 12px; color: #cbd6f6; max-height: 260px; overflow: auto; }
     .tab { display: none; }
     .tab.active { display: block; }
     .controls { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; }
-    select, button { background: #0f1a36; color: var(--text); border: 1px solid #233056; padding: 8px 10px; border-radius: 8px; }
+    select, button { background: rgba(15,26,54,.9); color: var(--text); border: 1px solid #233056; padding: 8px 10px; border-radius: 8px; transition: transform .12s ease, box-shadow .12s ease, border-color .2s ease; }
+    select:focus, button:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(19,179,255,.12); }
+    .tab-btn:hover, button:hover { transform: translateY(-1px); }
     button { cursor: pointer; pointer-events: auto; }
     #btnLoadEvents, #btnLoadAccess { cursor: pointer; pointer-events: auto; z-index: 1; position: relative; }
     /* Login modal */
@@ -45,7 +64,7 @@
     .login-card .err { color: #ff8a8a; margin-top: 8px; display: none; }
     /* Estilos para el gráfico de rendimiento */
     #performanceChart { 
-      background: #0f1a36; 
+      background: rgba(15,26,54,.75); 
       border-radius: 8px; 
       padding: 10px;
       max-height: 300px;
@@ -93,9 +112,28 @@
   <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  </head>
+</head>
 <body>
-<h1>Stark Security</h1>
+<!-- Non-intrusive animated background -->
+<div class="bg" aria-hidden="true">
+  <div class="bg-gradient"></div>
+  <div class="bg-blur"></div>
+  <div class="code-rain">
+    <span>&lt;system&gt; Initializing security pipeline... ✓</span>
+    <span>auth.role = ADMIN | ENGINEER | OPERATOR | VIEWER</span>
+    <span>sensor.stream &gt;&gt; TEMPERATURE | MOTION | ACCESS</span>
+    <span>AlertService.publish() :: ws://localhost:8080/ws</span>
+    <span>metrics: sensor.events.processed.total ++</span>
+    <span>latency.avg.ms = 12.4</span>
+    <span>Messaging[EMAIL|SMS|PUSH] → status: AVAILABLE</span>
+    <span>SecurityFilterChain ➜ authenticated routes: /, /index.html, /api/**</span>
+    <span>Micrometer@MeterRegistry → /actuator/metrics</span>
+    <span>Executor sensorExecutor{core=8, queue=LinkedBlockingQueue}</span>
+  </div>
+  <!-- A11y: hidden text ensures no interference with screen readers -->
+  <div style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;">Decorative animated background</div>
+  </div>
+<h1 style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;">Stark Security</h1>
 
 <header>
   <h1>Stark Security</h1>
@@ -132,21 +170,36 @@
     <canvas id="performanceChart" width="400" height="200"></canvas>
   </div>
   
-  <div class="card" style="margin-top: 16px;">
-    <h2 style="margin-top:0">Servicios de Mensajería</h2>
+        <div class="card" style="margin-top: 16px;">
+          <h2 style="margin-top:0">Configuración de Email</h2>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+            <div>
+              <label style="display: block; margin-bottom: 4px; font-size: 12px; color: var(--muted);">Email de Origen</label>
+              <input type="email" id="configEmailFrom" placeholder="tu-email@ejemplo.com" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text);">
+            </div>
+            <div>
+              <label style="display: block; margin-bottom: 4px; font-size: 12px; color: var(--muted);">Email de Destino</label>
+              <input type="email" id="configEmailTo" placeholder="destino@ejemplo.com" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text);">
+            </div>
+          </div>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;">
+            <button onclick="setTemporaryEmails()" class="btn btn-sm" style="background: #17a2b8;">Aplicar Temporal</button>
+            <button onclick="savePermanentEmails()" class="btn btn-sm" style="background: #28a745;">Guardar Permanente</button>
+            <button onclick="resetEmailConfig()" class="btn btn-sm" style="background: #6c757d;">Resetear</button>
+            <button onclick="loadEmailConfig()" class="btn btn-sm" style="background: #ffc107; color: #000;">Cargar Config</button>
+          </div>
+          <div id="emailConfigStatus" style="padding: 8px; border-radius: 4px; background: var(--bg-secondary); font-size: 12px; color: var(--muted);">
+            Cargando configuración...
+          </div>
+        </div>
+
+        <div class="card" style="margin-top: 16px;">
+          <h2 style="margin-top:0">Servicios de Mensajería</h2>
     <div id="messagingStatus" style="margin-bottom: 16px;">
       <div style="display: flex; gap: 16px; flex-wrap: wrap;">
         <div class="status-item">
           <span class="status-label">📧 Email:</span>
           <span id="emailStatus" class="status-value">Verificando...</span>
-        </div>
-        <div class="status-item">
-          <span class="status-label">📱 SMS:</span>
-          <span id="smsStatus" class="status-value">Verificando...</span>
-        </div>
-        <div class="status-item">
-          <span class="status-label">📲 Push:</span>
-          <span id="pushStatus" class="status-value">Verificando...</span>
         </div>
       </div>
     </div>
@@ -176,20 +229,10 @@
         <label style="display: block; margin-bottom: 4px; font-size: 12px; color: var(--muted);">Mensaje</label>
         <input type="text" id="customMessage" placeholder="Mensaje de la alerta" style="width: 100%; padding: 6px 8px; border-radius: 4px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text);">
       </div>
-      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 12px;">
-        <div>
-          <label style="display: block; margin-bottom: 4px; font-size: 12px; color: var(--muted);">📧 Emails (separados por comas)</label>
-          <input type="text" id="customEmails" placeholder="email1@test.com, email2@test.com" style="width: 100%; padding: 6px 8px; border-radius: 4px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text);">
-        </div>
-        <div>
-          <label style="display: block; margin-bottom: 4px; font-size: 12px; color: var(--muted);">📱 Teléfonos (separados por comas)</label>
-          <input type="text" id="customPhones" placeholder="+1234567890, +0987654321" style="width: 100%; padding: 6px 8px; border-radius: 4px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text);">
-        </div>
-        <div>
-          <label style="display: block; margin-bottom: 4px; font-size: 12px; color: var(--muted);">📲 Tokens Push (separados por comas)</label>
-          <input type="text" id="customTokens" placeholder="token1, token2, token3" style="width: 100%; padding: 6px 8px; border-radius: 4px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text);">
-        </div>
-      </div>
+          <div style="margin-bottom: 12px;">
+            <label style="display: block; margin-bottom: 4px; font-size: 12px; color: var(--muted);">📧 Emails (opcional - si no se especifica, usa configuración por defecto)</label>
+            <input type="text" id="customEmails" placeholder="Dejar vacío para usar llansoanleo.mario@gmail.com" style="width: 100%; padding: 6px 8px; border-radius: 4px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text);">
+          </div>
       <button onclick="sendCustomAlert()" class="btn" style="background: #28a745; width: 100%;">Enviar Alerta Personalizada</button>
     </div>
   </div>
@@ -511,22 +554,10 @@
 
   function updateMessagingStatus(status) {
     const emailStatus = document.getElementById('emailStatus');
-    const smsStatus = document.getElementById('smsStatus');
-    const pushStatus = document.getElementById('pushStatus');
 
     if (emailStatus) {
       emailStatus.textContent = status.EMAIL ? 'Disponible' : 'No disponible';
       emailStatus.className = 'status-value ' + (status.EMAIL ? 'available' : 'unavailable');
-    }
-
-    if (smsStatus) {
-      smsStatus.textContent = status.SMS ? 'Disponible' : 'No disponible';
-      smsStatus.className = 'status-value ' + (status.SMS ? 'available' : 'unavailable');
-    }
-
-    if (pushStatus) {
-      pushStatus.textContent = status.PUSH ? 'Disponible' : 'No disponible';
-      pushStatus.className = 'status-value ' + (status.PUSH ? 'available' : 'unavailable');
     }
   }
 
@@ -560,19 +591,7 @@
       const emailsStr = document.getElementById('customEmails').value;
       const emailRecipients = emailsStr ? emailsStr.split(',').map(e => e.trim()).filter(e => e) : [];
       
-      // Procesar teléfonos
-      const phonesStr = document.getElementById('customPhones').value;
-      const phoneNumbers = phonesStr ? phonesStr.split(',').map(p => p.trim()).filter(p => p) : [];
-      
-      // Procesar tokens push
-      const tokensStr = document.getElementById('customTokens').value;
-      const deviceTokens = tokensStr ? tokensStr.split(',').map(t => t.trim()).filter(t => t) : [];
-      
-      // Validar que al menos un destinatario esté especificado
-      if (emailRecipients.length === 0 && phoneNumbers.length === 0 && deviceTokens.length === 0) {
-        alert('Debe especificar al menos un destinatario (email, teléfono o token push)');
-        return;
-      }
+      // Si no se especifican emails, se usará la configuración por defecto
       
       // Crear el objeto de solicitud
       const alertRequest = {
@@ -580,9 +599,7 @@
         sensorType: 'TEMPERATURE', // Tipo por defecto
         severity: severity,
         message: message,
-        emailRecipients: emailRecipients,
-        phoneNumbers: phoneNumbers,
-        deviceTokens: deviceTokens
+        emailRecipients: emailRecipients
       };
       
       console.log('Enviando alerta personalizada:', alertRequest);
@@ -601,9 +618,11 @@
         
         // Mostrar resumen de envío
         let summary = `Alerta ${severity} enviada a:\n`;
-        if (emailRecipients.length > 0) summary += `📧 ${emailRecipients.length} emails\n`;
-        if (phoneNumbers.length > 0) summary += `📱 ${phoneNumbers.length} teléfonos\n`;
-        if (deviceTokens.length > 0) summary += `📲 ${deviceTokens.length} dispositivos\n`;
+        if (emailRecipients.length > 0) {
+          summary += `📧 ${emailRecipients.length} emails personalizados\n`;
+        } else {
+          summary += `📧 Email por defecto (llansoanleo.mario@gmail.com)\n`;
+        }
         
         alert(summary);
         
@@ -611,8 +630,6 @@
         document.getElementById('customSensor').value = '';
         document.getElementById('customMessage').value = '';
         document.getElementById('customEmails').value = '';
-        document.getElementById('customPhones').value = '';
-        document.getElementById('customTokens').value = '';
         
       } else {
         const error = await res.json();
@@ -624,11 +641,126 @@
     }
   }
 
+  // Funciones para configuración de email
+  async function loadEmailConfig() {
+    try {
+      const response = await fetch('/api/email-config/current');
+      const config = await response.json();
+      
+      document.getElementById('configEmailFrom').value = config.emailFrom || '';
+      document.getElementById('configEmailTo').value = config.emailTo || '';
+      
+      const status = document.getElementById('emailConfigStatus');
+      status.textContent = `Configuración actual: ${config.emailFrom} → ${config.emailTo} ${config.isTemporary === 'true' ? '(Temporal)' : '(Permanente)'}`;
+      status.style.background = config.isTemporary === 'true' ? '#fff3cd' : '#d4edda';
+      status.style.color = config.isTemporary === 'true' ? '#856404' : '#155724';
+      
+    } catch (error) {
+      console.error('Error loading email config:', error);
+      document.getElementById('emailConfigStatus').textContent = 'Error cargando configuración';
+      document.getElementById('emailConfigStatus').style.background = '#f8d7da';
+      document.getElementById('emailConfigStatus').style.color = '#721c24';
+    }
+  }
+  
+  async function setTemporaryEmails() {
+    const emailFrom = document.getElementById('configEmailFrom').value.trim();
+    const emailTo = document.getElementById('configEmailTo').value.trim();
+    
+    if (!emailFrom || !emailTo) {
+      alert('Por favor completa ambos campos de email');
+      return;
+    }
+    
+    try {
+      const response = await fetch('/api/email-config/set-temporary', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: `emailFrom=${encodeURIComponent(emailFrom)}&emailTo=${encodeURIComponent(emailTo)}`
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        document.getElementById('emailConfigStatus').textContent = `✅ Configuración temporal aplicada: ${emailFrom} → ${emailTo}`;
+        document.getElementById('emailConfigStatus').style.background = '#d4edda';
+        document.getElementById('emailConfigStatus').style.color = '#155724';
+      } else {
+        alert('Error: ' + result.message);
+      }
+      
+    } catch (error) {
+      console.error('Error setting temporary emails:', error);
+      alert('Error aplicando configuración temporal');
+    }
+  }
+  
+  async function savePermanentEmails() {
+    const emailFrom = document.getElementById('configEmailFrom').value.trim();
+    const emailTo = document.getElementById('configEmailTo').value.trim();
+    
+    if (!emailFrom || !emailTo) {
+      alert('Por favor completa ambos campos de email');
+      return;
+    }
+    
+    try {
+      const response = await fetch('/api/email-config/save-permanent', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: `emailFrom=${encodeURIComponent(emailFrom)}&emailTo=${encodeURIComponent(emailTo)}`
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        document.getElementById('emailConfigStatus').textContent = `💾 Configuración guardada permanentemente: ${emailFrom} → ${emailTo}`;
+        document.getElementById('emailConfigStatus').style.background = '#d1ecf1';
+        document.getElementById('emailConfigStatus').style.color = '#0c5460';
+      } else {
+        alert('Error: ' + result.message);
+      }
+      
+    } catch (error) {
+      console.error('Error saving permanent emails:', error);
+      alert('Error guardando configuración permanente');
+    }
+  }
+  
+  async function resetEmailConfig() {
+    try {
+      const response = await fetch('/api/email-config/reset', {
+        method: 'POST'
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        document.getElementById('configEmailFrom').value = result.config.emailFrom || '';
+        document.getElementById('configEmailTo').value = result.config.emailTo || '';
+        document.getElementById('emailConfigStatus').textContent = '🔄 Configuración reseteada a valores por defecto';
+        document.getElementById('emailConfigStatus').style.background = '#f8d7da';
+        document.getElementById('emailConfigStatus').style.color = '#721c24';
+      } else {
+        alert('Error reseteando configuración');
+      }
+      
+    } catch (error) {
+      console.error('Error resetting email config:', error);
+      alert('Error reseteando configuración');
+    }
+  }
+
   // Init
   connect();
   loadMetrics();
   initPerformanceChart();
   loadMessagingStatus();
+  loadEmailConfig();
   
   // Actualizar gráfico cada 2 segundos
   setInterval(updatePerformanceChart, 2000);

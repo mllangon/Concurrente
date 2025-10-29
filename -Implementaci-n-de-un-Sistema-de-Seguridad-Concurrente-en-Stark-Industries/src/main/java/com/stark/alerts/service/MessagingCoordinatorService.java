@@ -22,20 +22,17 @@ public class MessagingCoordinatorService {
     
     private final List<MessagingService> messagingServices;
     private final CustomEmailMessagingService customEmailService;
-    private final CustomSmsMessagingService customSmsService;
-    private final CustomPushNotificationService customPushService;
+    private final EmailConfigurationService emailConfigService;
     private final MeterRegistry meterRegistry;
     
     @Autowired
     public MessagingCoordinatorService(List<MessagingService> messagingServices,
-                                      CustomEmailMessagingService customEmailService,
-                                      CustomSmsMessagingService customSmsService,
-                                      CustomPushNotificationService customPushService,
-                                      MeterRegistry meterRegistry) {
+                                       CustomEmailMessagingService customEmailService,
+                                       EmailConfigurationService emailConfigService,
+                                       MeterRegistry meterRegistry) {
         this.messagingServices = messagingServices;
         this.customEmailService = customEmailService;
-        this.customSmsService = customSmsService;
-        this.customPushService = customPushService;
+        this.emailConfigService = emailConfigService;
         this.meterRegistry = meterRegistry;
     }
     
@@ -133,62 +130,31 @@ public class MessagingCoordinatorService {
         
         Map<String, Boolean> results = new java.util.HashMap<>();
         
-        // Enviar a emails personalizados
-        if (request.getEmailRecipients() != null && !request.getEmailRecipients().isEmpty()) {
-            try {
-                boolean success = customEmailService.sendAlertToRecipients(message, request.getEmailRecipients());
-                results.put("EMAIL_CUSTOM", success);
-                meterRegistry.counter("messaging.sent", 
-                        "service", "EMAIL_CUSTOM",
-                        "severity", message.getSeverity().name(),
-                        "success", String.valueOf(success))
-                        .increment();
-            } catch (Exception e) {
-                results.put("EMAIL_CUSTOM", false);
-                meterRegistry.counter("messaging.error", 
-                        "service", "EMAIL_CUSTOM",
-                        "severity", message.getSeverity().name())
-                        .increment();
-            }
+        // Si no se especifican destinatarios, usar configuración por defecto
+        List<String> emailRecipients = request.getEmailRecipients();
+        if (emailRecipients == null || emailRecipients.isEmpty()) {
+            // Usar email de destino por defecto de la configuración
+            String defaultEmail = emailConfigService.getEmailTo();
+            emailRecipients = List.of(defaultEmail);
         }
         
-        // Enviar a números SMS personalizados
-        if (request.getPhoneNumbers() != null && !request.getPhoneNumbers().isEmpty()) {
-            try {
-                boolean success = customSmsService.sendAlertToNumbers(message, request.getPhoneNumbers());
-                results.put("SMS_CUSTOM", success);
-                meterRegistry.counter("messaging.sent", 
-                        "service", "SMS_CUSTOM",
-                        "severity", message.getSeverity().name(),
-                        "success", String.valueOf(success))
-                        .increment();
-            } catch (Exception e) {
-                results.put("SMS_CUSTOM", false);
-                meterRegistry.counter("messaging.error", 
-                        "service", "SMS_CUSTOM",
-                        "severity", message.getSeverity().name())
-                        .increment();
-            }
+        // Enviar a emails (personalizados o por defecto)
+        try {
+            boolean success = customEmailService.sendAlertToRecipients(message, emailRecipients);
+            results.put("EMAIL", success);
+            meterRegistry.counter("messaging.sent", 
+                    "service", "EMAIL",
+                    "severity", message.getSeverity().name(),
+                    "success", String.valueOf(success))
+                    .increment();
+        } catch (Exception e) {
+            results.put("EMAIL", false);
+            meterRegistry.counter("messaging.error", 
+                    "service", "EMAIL",
+                    "severity", message.getSeverity().name())
+                    .increment();
         }
         
-        // Enviar a tokens push personalizados
-        if (request.getDeviceTokens() != null && !request.getDeviceTokens().isEmpty()) {
-            try {
-                boolean success = customPushService.sendAlertToDevices(message, request.getDeviceTokens());
-                results.put("PUSH_CUSTOM", success);
-                meterRegistry.counter("messaging.sent", 
-                        "service", "PUSH_CUSTOM",
-                        "severity", message.getSeverity().name(),
-                        "success", String.valueOf(success))
-                        .increment();
-            } catch (Exception e) {
-                results.put("PUSH_CUSTOM", false);
-                meterRegistry.counter("messaging.error", 
-                        "service", "PUSH_CUSTOM",
-                        "severity", message.getSeverity().name())
-                        .increment();
-            }
-        }
         
         return CompletableFuture.completedFuture(results);
     }

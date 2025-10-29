@@ -4,8 +4,6 @@ import com.stark.alerts.dto.AlertMessage;
 import com.stark.alerts.dto.AlertRequest;
 import com.stark.alerts.service.AlertService;
 import com.stark.alerts.service.MessagingCoordinatorService;
-import com.stark.alerts.service.SmsMessagingService;
-import com.stark.alerts.service.PushNotificationService;
 import com.stark.sensors.domain.SensorType;
 import com.stark.sensors.domain.SensorEvent.Severity;
 import org.springframework.http.ResponseEntity;
@@ -25,17 +23,11 @@ public class MessagingController {
     
     private final AlertService alertService;
     private final MessagingCoordinatorService messagingCoordinator;
-    private final SmsMessagingService smsService;
-    private final PushNotificationService pushService;
     
     public MessagingController(AlertService alertService,
-                              MessagingCoordinatorService messagingCoordinator,
-                              SmsMessagingService smsService,
-                              PushNotificationService pushService) {
+                              MessagingCoordinatorService messagingCoordinator) {
         this.alertService = alertService;
         this.messagingCoordinator = messagingCoordinator;
-        this.smsService = smsService;
-        this.pushService = pushService;
     }
     
     /**
@@ -109,43 +101,6 @@ public class MessagingController {
         ));
     }
     
-    /**
-     * Gestiona números de teléfono para SMS
-     */
-    @PostMapping("/sms/phone")
-    public ResponseEntity<Map<String, Object>> addPhoneNumber(@RequestParam String phoneNumber) {
-        smsService.addPhoneNumber(phoneNumber);
-        
-        return ResponseEntity.ok(Map.of(
-                "message", "Número de teléfono agregado",
-                "phoneNumber", phoneNumber,
-                "totalPhones", smsService.getPhoneNumbers().size()
-        ));
-    }
-    
-    @GetMapping("/sms/phones")
-    public ResponseEntity<List<String>> getPhoneNumbers() {
-        return ResponseEntity.ok(smsService.getPhoneNumbers());
-    }
-    
-    /**
-     * Gestiona tokens de dispositivos para push notifications
-     */
-    @PostMapping("/push/device")
-    public ResponseEntity<Map<String, Object>> addDeviceToken(@RequestParam String deviceToken) {
-        pushService.addDeviceToken(deviceToken);
-        
-        return ResponseEntity.ok(Map.of(
-                "message", "Token de dispositivo agregado",
-                "deviceToken", deviceToken.substring(0, Math.min(8, deviceToken.length())) + "...",
-                "totalDevices", pushService.getDeviceTokens().size()
-        ));
-    }
-    
-    @GetMapping("/push/devices")
-    public ResponseEntity<List<String>> getDeviceTokens() {
-        return ResponseEntity.ok(pushService.getDeviceTokens());
-    }
     
     /**
      * Envía una alerta con destinatarios personalizados
@@ -177,9 +132,7 @@ public class MessagingController {
                     ),
                     "results", results,
                     "recipients", Map.of(
-                            "emails", request.getEmailRecipients() != null ? request.getEmailRecipients().size() : 0,
-                            "phones", request.getPhoneNumbers() != null ? request.getPhoneNumbers().size() : 0,
-                            "devices", request.getDeviceTokens() != null ? request.getDeviceTokens().size() : 0
+                            "emails", request.getEmailRecipients() != null ? request.getEmailRecipients().size() : 0
                     )
             ));
         } catch (Exception e) {

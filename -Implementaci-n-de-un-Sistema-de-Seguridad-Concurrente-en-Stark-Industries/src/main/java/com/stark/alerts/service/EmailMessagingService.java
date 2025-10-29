@@ -19,27 +19,27 @@ import java.time.ZoneId;
 public class EmailMessagingService implements MessagingService {
     
     private final JavaMailSender mailSender;
-    private final String emailTo;
-    private final String emailFrom;
+    private final EmailConfigurationService emailConfigService;
     private final boolean htmlEnabled;
     
     public EmailMessagingService(JavaMailSender mailSender,
-                                @Value("${app.alerts.email-to:admin@stark.com}") String emailTo,
-                                @Value("${app.alerts.email-from:noreply@stark.com}") String emailFrom,
-                                @Value("${app.alerts.email.html-enabled:true}") boolean htmlEnabled) {
+                                 EmailConfigurationService emailConfigService,
+                                 @Value("${app.alerts.email.html-enabled:true}") boolean htmlEnabled) {
         this.mailSender = mailSender;
-        this.emailTo = emailTo;
-        this.emailFrom = emailFrom;
+        this.emailConfigService = emailConfigService;
         this.htmlEnabled = htmlEnabled;
     }
     
     @Override
     public boolean sendAlert(AlertMessage message) {
         try {
+            String emailTo = emailConfigService.getEmailTo();
+            String emailFrom = emailConfigService.getEmailFrom();
+            
             if (htmlEnabled) {
-                return sendHtmlEmail(message);
+                return sendHtmlEmail(message, emailTo, emailFrom);
             } else {
-                return sendPlainTextEmail(message);
+                return sendPlainTextEmail(message, emailTo, emailFrom);
             }
         } catch (Exception e) {
             System.err.println("Error sending email alert: " + e.getMessage());
@@ -47,7 +47,7 @@ public class EmailMessagingService implements MessagingService {
         }
     }
     
-    private boolean sendHtmlEmail(AlertMessage message) throws MessagingException {
+    private boolean sendHtmlEmail(AlertMessage message, String emailTo, String emailFrom) throws MessagingException {
         MimeMessage mimeMessage = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
         
@@ -60,7 +60,7 @@ public class EmailMessagingService implements MessagingService {
         return true;
     }
     
-    private boolean sendPlainTextEmail(AlertMessage message) {
+    private boolean sendPlainTextEmail(AlertMessage message, String emailTo, String emailFrom) {
         SimpleMailMessage mail = new SimpleMailMessage();
         mail.setTo(emailTo);
         mail.setFrom(emailFrom);
@@ -105,7 +105,9 @@ public class EmailMessagingService implements MessagingService {
                         <div class="severity">%s</div>
                     </div>
                     <div class="content">
-                        <div class="sensor"><strong>Sensor:</strong> %s</div>
+                        <div class="message">
+                            <strong>Hay un evento de la gravedad "%s" que proviene del sensor "%s"</strong>
+                        </div>
                         <div class="sensor"><strong>Tipo:</strong> %s</div>
                         <div class="sensor"><strong>Timestamp:</strong> %s</div>
                         <div class="message">
@@ -123,6 +125,7 @@ public class EmailMessagingService implements MessagingService {
             """, 
             severityColor, severityColor,
             message.getSeverity(),
+            message.getSeverity(),
             message.getSensorName(),
             message.getType(),
             message.getTimestamp().atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")),
@@ -134,8 +137,8 @@ public class EmailMessagingService implements MessagingService {
         return String.format("""
             ALERTA DE SEGURIDAD - STARK INDUSTRIES
             
-            Severidad: %s
-            Sensor: %s
+            Hay un evento de la gravedad "%s" que proviene del sensor "%s"
+            
             Tipo: %s
             Timestamp: %s
             

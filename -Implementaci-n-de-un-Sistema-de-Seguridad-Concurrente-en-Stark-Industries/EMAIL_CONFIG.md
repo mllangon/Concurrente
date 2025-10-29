@@ -124,3 +124,6 @@ Mensaje: Temperatura excede límites seguros
 ### **Error: "Invalid credentials"**
 - Regenera la contraseña de aplicación
 - Asegúrate de copiar la contraseña completa (16 caracteres)
+
+
+
