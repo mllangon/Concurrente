@@ -7,17 +7,17 @@
 #### **Configuración de Email (Para Alertas)**
 Para habilitar las alertas por correo electrónico, es necesario configurar un servidor SMTP. A continuación, se presentan las opciones:
 
-**Opción A: Gmail (Recomendado)
-Accede a la Seguridad de la Cuenta de Google.
-Activa la verificación en dos pasos.
-Genera una contraseña de aplicación específica para "Stark Security".
-Configura las variables de entorno (consulta la sección de configuración para más detalles).
+** Opción A: Gmail (Recomendado)
+1, Accede a la Seguridad de la Cuenta de Google.
+2. Activa la verificación en dos pasos.
+3. Genera una contraseña de aplicación específica para "Stark Security".
+4. Configura las variables de entorno (consulta la sección de configuración para más detalles).
 
-**Opción B: Outlook/Hotmail
+** Opción B: Outlook/Hotmail
 - Utiliza tu cuenta de Outlook con tu contraseña habitual.
 
 
-**Opción C: Yahoo
+** Opción C: Yahoo
 - Requiere una contraseña de aplicación, de manera similar a Gmail.
 
 
