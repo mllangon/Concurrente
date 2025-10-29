@@ -4,6 +4,11 @@
 
 ### Prerrequisitos
 
+### **Versiones**
+Para el correcto funcionamiento del sistema de seguridad se necesita Java SDK 21 y Maven 3.8.x o superior
+
+El comando para iniciar la aplicación sería -> mvn spring-boot:run
+
 #### **Configuración de Email (Para Alertas)**
 Para que las alertas por email funcionen, necesitas configurar un servidor SMTP:
 
